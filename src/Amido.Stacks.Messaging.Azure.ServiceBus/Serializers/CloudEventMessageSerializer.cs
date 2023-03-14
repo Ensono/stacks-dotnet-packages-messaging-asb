@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using Amido.Stacks.Core.Operations;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Microsoft.Azure.ServiceBus;
@@ -12,7 +16,27 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
     {
         public Message Build<T>(T body)
         {
-            Guid correlationId = GetCorrelationId(body);
+            Message message;
+            if (body is MessageEnvelope messageEnvelope)
+            {
+                message = BuildMessageFromMessageEnvelope(messageEnvelope);
+            }
+            else
+            {
+                message = BuildMessageFromEvent(body);
+            }
+
+            return message.SetSerializerType(this.GetType());
+        }
+
+        public IEnumerable<Message> Build<T>(IEnumerable<T> bodies)
+        {
+            return bodies.Select(Build);
+        }
+
+        private Message BuildMessageFromEvent<T>(T body)
+        {
+            var correlationId = GetCorrelationId(body);
 
             var cloudEvent = new StacksCloudEvent<T>(body, correlationId)
             {
@@ -27,15 +51,60 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                 Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cloudEvent))
             };
 
-            return message
-                .SetEnclosedMessageType(typeof(StacksCloudEvent<>).MakeGenericType(body.GetType()))
-                .SetSerializerType(this.GetType())
-                .SetSessionId(body);
+            message.SetSessionId(body);
+            return message.SetEnclosedMessageType(typeof(StacksCloudEvent<>).MakeGenericType(body.GetType()));
+        }
+
+        private Message BuildMessageFromMessageEnvelope(MessageEnvelope envelope)
+        {
+            var cloudEvent = CreateCloudEvent(envelope.Data.GetType(), envelope.Data, Guid.Parse(envelope.CorrelationId));
+
+            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cloudEvent)))
+            {
+                CorrelationId = envelope.CorrelationId,
+                ContentType = envelope.ContentType ?? "application/cloudevents+json;charset=utf-8",
+                Label = envelope.Label,
+                To = envelope.To,
+                PartitionKey = envelope.PartitionKey,
+                ReplyTo = envelope.ReplyTo,
+                ScheduledEnqueueTimeUtc = envelope.ScheduledEnqueueTimeUtc,
+                ReplyToSessionId = envelope.ReplyToSessionId,
+                ViaPartitionKey = envelope.ViaPartitionKey,
+                SessionId = envelope.SessionId
+            };
+
+            if (!string.IsNullOrEmpty(envelope.MessageId))
+            {
+                message.MessageId = envelope.MessageId;
+            }
+
+            if (envelope.TimeToLive.HasValue)
+            {
+                message.TimeToLive = envelope.TimeToLive.Value;
+            }
+
+            foreach (var property in envelope.UserProperties)
+            {
+                message.UserProperties[property.Key] = envelope.UserProperties[property.Key];
+            }
+
+            return message.SetEnclosedMessageType(typeof(StacksCloudEvent<>).MakeGenericType(envelope.Data.GetType()));
+        }
+
+        private object CreateCloudEvent(Type dataType, object data, Guid correlationId)
+        {
+            var type = typeof(StacksCloudEvent<>).MakeGenericType(dataType);
+            var cloudEvent =
+                Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { data, correlationId }, null);
+
+            type.GetMethod("set_DataContentType", BindingFlags.Instance | BindingFlags.Public).Invoke(cloudEvent, new object[] { "application/json" });
+            type.GetMethod("set_Source", BindingFlags.Instance | BindingFlags.Public).Invoke(cloudEvent, new object[] { GetSource() });
+            return cloudEvent;
         }
 
         public T Read<T>(Message message)
         {
-            Type type = null;
+            Type type;
 
             var messageType = message.GetEnclosedMessageType();
 

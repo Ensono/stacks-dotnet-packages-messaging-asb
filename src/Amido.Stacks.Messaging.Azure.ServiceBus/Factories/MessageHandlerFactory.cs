@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 {
@@ -20,7 +21,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
         public object CreateHandlerFor(Type type)
         {
             if (handlers.ContainsKey(type))
-                return provider.GetService(handlers[type]);
+                return provider.GetRequiredService(handlers[type]);
             else
                 return default;
         }

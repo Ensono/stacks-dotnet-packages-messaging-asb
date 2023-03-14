@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
-using Amido.Stacks.Application.CQRS.Commands;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Events;
 using Microsoft.Azure.ServiceBus;
@@ -152,7 +152,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             config.Sender.Topics = config.Sender.Topics.Take(1).ToArray();
             services.AddServiceBus();
 
-            var eventPublisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
+            var eventPublisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
             await eventPublisher.PublishAsync(new NotifyEvent(guid, 2));
 
             await senderClients.First().Received(1).SendAsync(Arg.Is<Message>(m => m.CorrelationId == guid.ToString()));
@@ -193,7 +193,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             config.Sender.Routing.Topics = new[] { route };
             services.AddServiceBus();
 
-            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
             await publisher.PublishAsync(new NotifyEvent(guid, 1));
 
             Assert.True(config.Sender.Topics.Length > 1);
@@ -226,7 +226,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             services.AddServiceBus();
 
             //ACT
-            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
 
             await Assert.ThrowsAsync<Exception>(() => publisher.PublishAsync(new NotifyEvent(guid, 1)));
         }
@@ -279,7 +279,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             services.AddServiceBus();
 
             //ACT
-            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
             await publisher.PublishAsync(new NotifyEvent(guid1, 1));
             await publisher.PublishAsync(new DummyEvent(guid2));
 

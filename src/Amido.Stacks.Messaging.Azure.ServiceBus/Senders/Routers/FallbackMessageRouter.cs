@@ -66,6 +66,36 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             }
         }
 
+        public async Task SendAsync(IEnumerable<object> messages)
+        {
+            var enumerator = senders.GetEnumerator();
+            enumerator.MoveNext();
+            while (enumerator.Current != null)
+            {
+                try
+                {
+                    await enumerator.Current.SendAsync(messages);
+                }
+                catch (JsonSerializationException ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+
+                    if (!enumerator.MoveNext())
+                        throw;
+
+                    logger.LogWarning($"Fallback: Sending message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+
+                    continue;
+                }
+
+                break;
+            }
+        }
+
         public bool Match(Type type)
         {
             if (routeConfig.TypeFilter == null || routeConfig.TypeFilter.Length == 0)
@@ -74,11 +104,9 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             return routeConfig.TypeFilter.Any(f => f == type.FullName);
         }
 
-        private string GetMessageIdentifier(object message)
+        private static string GetMessageIdentifier(object message)
         {
-            var ctx = message as IOperationContext;
-
-            return ctx == null ? "'<no-CorrelationId>'" : "'{ctx.CorrelationId}'";
+            return !(message is IOperationContext ctx) ? "'<no-CorrelationId>'" : "'{ctx.CorrelationId}'";
         }
     }
 }

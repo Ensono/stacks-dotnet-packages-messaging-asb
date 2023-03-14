@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "TestHost": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SERVICEBUS_CONNECTIONSTRING": "Endpoint=sb://lbsservicebus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=KXa88FYzK5w3PMrlIYvwtOLkV/pxAZmrGDt7ZYlFDx4="
+      }
+    }
+  }
+}

@@ -30,6 +30,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             await sender.SendAsync(message);
         }
 
+        public async Task SendAsync(IEnumerable<object> messages)
+        {
+            var sender = senders.First();
+            await sender.SendAsync(messages);
+        }
+
         public bool Match(Type type) => true;
     }
 }

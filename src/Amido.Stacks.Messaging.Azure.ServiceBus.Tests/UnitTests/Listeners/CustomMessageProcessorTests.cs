@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Events;
 using Amido.Stacks.Messaging.Handlers;
@@ -93,7 +93,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid.ToString()));
             await client.Received(1).CompleteAsync(Arg.Is<string>(a => a == lockToken.ToString()));
             await client.Received(0).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
@@ -123,7 +123,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid.ToString()));
             await client.Received(0).CompleteAsync(Arg.Any<string>());
             await client.Received(0).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
@@ -143,9 +143,9 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var obj = new NotifyEvent(guid, 123);
 
             if (serializer == nameof(CloudEventMessageSerializer))
-                return new CloudEventMessageSerializer().Build<IApplicationEvent>(obj);
+                return new CloudEventMessageSerializer().Build<IEvent>(obj);
             else
-                return new JsonMessageSerializer().Build<IApplicationEvent>(obj);
+                return new JsonMessageSerializer().Build<IEvent>(obj);
         }
     }
 }

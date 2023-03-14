@@ -1,13 +1,13 @@
 ﻿using System;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
-using Amido.Stacks.Application.CQRS.Commands;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Events;
 using Shouldly;
 using Xunit;
 
-namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
+namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 {
     public class CloudEventMessageReaderTests
     {
@@ -25,7 +25,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyCommand));
-            result.CorrelationId.ShouldBe(correlationId);
+            result.CorrelationId.ShouldBe(correlationId.ToString());
             result.TestMember.ShouldBe(testMember);
         }
 
@@ -37,12 +37,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
             var correlationId = Guid.NewGuid();
             var message = serializer.Build(new NotifyEvent(correlationId, 321, "session-id"));
 
-            var result = serializer.Read<IApplicationEvent>(message) as NotifyEvent;
+            var result = serializer.Read<IEvent>(message) as NotifyEvent;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyEvent));
             result.EventCode.ShouldBe(123);
-            result.CorrelationId.ShouldBe(correlationId);
+            result.CorrelationId.ShouldBe(correlationId.ToString());
             result.OperationCode.ShouldBe(321);
             result.SessionId.ShouldBe("session-id");
         }

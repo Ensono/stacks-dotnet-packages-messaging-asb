@@ -45,7 +45,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyCommand));
-            result.CorrelationId.ShouldBe(correlationId);
+            result.CorrelationId.ShouldBe(correlationId.ToString());
             result.TestMember.ShouldBe(testMember);
         }
 
@@ -65,7 +65,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyEvent));
-            result.CorrelationId.ShouldBe(correlationId);
+            result.CorrelationId.ShouldBe(correlationId.ToString());
             result.SessionId.ShouldBe("session-id");
         }
     }

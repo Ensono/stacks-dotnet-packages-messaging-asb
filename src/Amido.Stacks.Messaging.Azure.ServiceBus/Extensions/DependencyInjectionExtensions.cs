@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
-using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Core.Operations;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Hosts;
@@ -138,7 +138,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 return false;
 
             services
-                .AddTransient<IApplicationEventPublisher, EventPublisher>()
+                .AddTransient<IEventPublisher, EventPublisher>()
             ;
 
             var factory = services.BuildServiceProvider().GetRequiredService<IServiceBusSenderFactory>();
@@ -238,7 +238,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     new MessageHandlerFactory(p,
                         services.GetRegisteredHandlersFor(
                             typeof(ICommandHandler<,>),
-                            typeof(IApplicationEventHandler<>))
+                            typeof(IEventHandler<>))
                         ))
 
                 .AddSingleton<IMessageProcessorFactory, MessageProcessorFactory>()
@@ -275,7 +275,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var topic in topics)
             {
-                services.AddSingleton(factory.Create<IApplicationEvent>(topic));
+                services.AddSingleton(factory.Create<IEvent>(topic));
             }
 
             return true;

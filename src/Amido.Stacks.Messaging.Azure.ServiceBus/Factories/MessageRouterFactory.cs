@@ -56,15 +56,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                     configuration
                 );
             }
-            else
-            {
-                return new FallbackMessageRouter<IQueueSender>(
-                    sp.GetRequiredService<ILogger<FallbackMessageRouter<IQueueSender>>>(),
-                    sp.GetRequiredService<IEnumerable<IQueueSender>>(),
-                    configuration
-                );
 
-            }
+            return new FallbackMessageRouter<IQueueSender>(
+                sp.GetRequiredService<ILogger<FallbackMessageRouter<IQueueSender>>>(),
+                sp.GetRequiredService<IEnumerable<IQueueSender>>(),
+                configuration
+            );
         }
     }
 }

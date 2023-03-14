@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Amido.Stacks.Application.CQRS.Commands;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
@@ -124,7 +124,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyCommand>(m => m.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyCommand>(m => m.CorrelationId == guid.ToString()));
         }
 
 

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Amido.Stacks.Application.CQRS.Commands;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Handlers.TestDependency;
 

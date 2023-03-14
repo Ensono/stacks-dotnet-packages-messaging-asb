@@ -1,6 +1,6 @@
-﻿using Amido.Stacks.Application.CQRS.ApplicationEvents;
-using Amido.Stacks.Application.CQRS.Commands;
+﻿using System.Windows.Input;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus
 {
@@ -12,7 +12,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus
             public const string EventSerializer = nameof(Serializers.CloudEventMessageSerializer);
 
             public const string QueueListenerMessageProcessor = nameof(ServiceBusListenerMessageProcessor<ICommand>);
-            public const string TopicListenerMessageProcessor = nameof(ServiceBusListenerMessageProcessor<IApplicationEvent>);
+            public const string TopicListenerMessageProcessor = nameof(ServiceBusListenerMessageProcessor<IEvent>);
         }
     }
 
