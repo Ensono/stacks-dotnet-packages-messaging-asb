@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Windows.Input;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Core.Operations;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,8 +29,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 
             if (configuration is ServiceBusSubscriptionListenerConfiguration)
             {
-                return new ServiceBusListenerMessageProcessor<IEvent>(
-                    serviceProvider.GetRequiredService<ILogger<ServiceBusListenerMessageProcessor<IEvent>>>(),
+                return new ServiceBusListenerMessageProcessor<IApplicationEvent>(
+                    serviceProvider.GetRequiredService<ILogger<ServiceBusListenerMessageProcessor<IApplicationEvent>>>(),
                     serviceProvider.GetRequiredService<IMessagerReaderFactory>(),
                     serviceProvider.GetRequiredService<IMessageHandlerFactory>(),
                     serviceProvider.GetRequiredService<IValidator<IOperationContext>>(),

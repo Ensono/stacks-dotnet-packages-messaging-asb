@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
-namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
+namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 {
     public class JsonMessageReaderTests
     {
@@ -65,7 +65,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyEvent));
-            result.CorrelationId.ShouldBe(correlationId.ToString());
+            result.CorrelationId.ShouldBe(correlationId);
             result.SessionId.ShouldBe("session-id");
         }
     }

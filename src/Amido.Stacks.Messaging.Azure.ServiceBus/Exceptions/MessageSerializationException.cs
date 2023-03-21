@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
@@ -14,6 +15,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
         }
 
         public MessageSerializationException(string exceptionMessage, Message context,
+            Exception innerException = null) : base((int)ExceptionIds.Serialization, exceptionMessage, context,
+            innerException)
+        {
+        }
+
+        public MessageSerializationException(string exceptionMessage, ServiceBusReceivedMessage context,
             Exception innerException = null) : base((int)ExceptionIds.Serialization, exceptionMessage, context,
             innerException)
         {

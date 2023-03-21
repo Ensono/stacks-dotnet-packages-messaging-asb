@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus
 {

@@ -6,6 +6,7 @@ using Amido.Stacks.Core.Operations;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 
@@ -13,18 +14,17 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
 {
     public class JsonMessageSerializer : IMessageReader, IMessageBuilder
     {
+        private const string DEFAULT_CONTENT_TYPE = "application/json;charset=utf-8";
+
         public Message Build<T>(T body)
         {
-            Message message;
-            if (body is MessageEnvelope messageEnvelope)
-            {
-                message = BuildMessageFromMessageEnvelope(messageEnvelope);
-            }
-            else
-            {
-                message = BuildMessageFromEvent(body);
-            }
+            var message = BuildMessage(body);
+            return message.SetSerializerType(GetType());
+        }
 
+        public Message Build(IMessageEnvelope body)
+        {
+            var message = BuildMessage(body);
             return message.SetSerializerType(GetType());
         }
 
@@ -33,14 +33,19 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
             return bodies.Select(Build);
         }
 
-        private static Message BuildMessageFromEvent<T>(T body)
+        public IEnumerable<Message> Build(IEnumerable<IMessageEnvelope> bodies)
+        {
+            return bodies.Select(Build);
+        }
+
+        private static Message BuildMessage<T>(T body)
         {
             var correlationId = GetCorrelationId(body);
 
             var message = new Message
             {
                 CorrelationId = $"{correlationId}",
-                ContentType = "application/json;charset=utf-8",
+                ContentType = DEFAULT_CONTENT_TYPE,
                 Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(body))
             };
 
@@ -49,21 +54,56 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                 .SetSessionId(body);
         }
 
-        private static Message BuildMessageFromMessageEnvelope(MessageEnvelope envelope)
+        private static Message BuildMessage(IMessageEnvelope envelope)
         {
-            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(envelope.Data)))
+            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(envelope.Data)));
+
+            if (!string.IsNullOrEmpty(envelope.CorrelationId))
             {
-                CorrelationId = envelope.CorrelationId,
-                ContentType = envelope.ContentType ?? "application/json;charset=utf-8",
-                Label = envelope.Label,
-                To = envelope.To,
-                PartitionKey = envelope.PartitionKey,
-                ReplyTo = envelope.ReplyTo,
-                ScheduledEnqueueTimeUtc = envelope.ScheduledEnqueueTimeUtc,
-                ReplyToSessionId = envelope.ReplyToSessionId,
-                ViaPartitionKey = envelope.ViaPartitionKey,
-                SessionId = envelope.SessionId
-            };
+                message.CorrelationId = envelope.CorrelationId;
+            }
+
+            message.ContentType = !string.IsNullOrEmpty(envelope.ContentType) ? envelope.ContentType : DEFAULT_CONTENT_TYPE;
+
+            if (!string.IsNullOrEmpty(envelope.Label))
+            {
+                message.Label = envelope.Label;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.ReplyTo))
+            {
+                message.ReplyTo = envelope.ReplyTo;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.To))
+            {
+                message.To = envelope.To;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.PartitionKey))
+            {
+                message.PartitionKey = envelope.PartitionKey;
+            }
+
+            if (envelope.ScheduledEnqueueTimeUtc.HasValue)
+            {
+                message.ScheduledEnqueueTimeUtc = envelope.ScheduledEnqueueTimeUtc.Value;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.ReplyToSessionId))
+            {
+                message.ReplyToSessionId = envelope.ReplyToSessionId;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.ViaPartitionKey))
+            {
+                message.ViaPartitionKey = envelope.ViaPartitionKey;
+            }
+
+            if (!string.IsNullOrEmpty(envelope.SessionId))
+            {
+                message.SessionId = envelope.SessionId;
+            }
 
             if (!string.IsNullOrEmpty(envelope.MessageId))
             {
@@ -95,27 +135,18 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
         /// <returns></returns>
         public T Read<T>(Message message)
         {
-            Type type;
+            return ReadMessageBody<T>(message);
+        }
 
+        public T ReadMessageBody<T>(Message message)
+        {
             var messageType = message.GetEnclosedMessageType();
 
-            if (!string.IsNullOrEmpty(messageType))
+            var type = GetEnclosedMessageType(messageType);
+            if (type == null)
             {
-                type = Type.GetType(messageType);
+                throw new MessageSerializationException("The message type is unknown", message);
             }
-            else
-            {
-                throw new MessageSerializationException("The message type in unknown", null);
-            }
-
-            // This will make the serializer flexible to deserialize to the type of T when 
-            // the message does not contain an Enclosed Message Type
-            // The problem with this approach is the serializer won't throw an exception if 
-            // the types does not match. 
-            //if (type == null)
-            //{
-            //    type = typeof(T);
-            //}
 
             try
             {
@@ -125,6 +156,51 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                 }
 
                 return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), type);
+            }
+            catch (InvalidCastException ex)
+            {
+                throw new MessageInvalidCastException("Invalid cast of the object in the message body ", message, ex);
+            }
+            catch (JsonSerializationException ex)
+            {
+                throw new MessageSerializationException("Failed to deserialize the message ", message, ex);
+            }
+        }
+
+        private static Type GetEnclosedMessageType(string messageType)
+        {
+            Type type = null;
+            if (!string.IsNullOrEmpty(messageType))
+            {
+                type = Type.GetType(messageType);
+            }
+
+            return type;
+        }
+
+        public T Read<T>(ServiceBusReceivedMessage message)
+        {
+            return ReadMessageBody<T>(message);
+        }
+
+        public T ReadMessageBody<T>(ServiceBusReceivedMessage message)
+        {
+            var messageType = message.GetEnclosedMessageType();
+
+            var type = GetEnclosedMessageType(messageType);
+            if (type == null)
+            {
+                throw new MessageSerializationException("The message type is unknown", message);
+            }
+
+            try
+            {
+                if (message.Body is null || message.Body.ToArray().Length == 0)
+                {
+                    throw new MessageBodyIsNullException($"The body of the message {message.MessageId} is null.", message);
+                }
+
+                return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body.ToArray()), type);
             }
             catch (InvalidCastException ex)
             {

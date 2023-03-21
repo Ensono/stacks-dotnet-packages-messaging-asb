@@ -1,18 +1,21 @@
-﻿using Amido.Stacks.Configuration.Extensions;
+﻿using Amido.Stacks.Configuration;
+using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
-using MessagingHost;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
 using TestCommon;
 using TestHost;
+using TestHost.ServiceBusListener;
 
 const string serviceBusConfigurationKeyName = "ServiceBusConfiguration";
 
 var host = Host.CreateDefaultBuilder(args)
-    .ConfigureLogging(builder => builder.AddConsole())
     .ConfigureServices((hostContext, services) =>
     {
         services.AddSecrets()
@@ -20,10 +23,39 @@ var host = Host.CreateDefaultBuilder(args)
             .Configure<ServiceBusConfiguration>(
                 hostContext.Configuration.GetSection(serviceBusConfigurationKeyName))
             .AddOptions()
-            .AddLogging(l => l.AddConsole())
+            .AddLogging(loggingBuilder =>
+                loggingBuilder.AddSerilog(
+                    new LoggerConfiguration()
+                        .MinimumLevel.Information()
+                        .Enrich.FromLogContext()
+                        .Enrich.WithThreadId()
+                        .Enrich.WithMachineName()
+                        .WriteTo.Console(
+                            outputTemplate:
+                            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                            restrictedToMinimumLevel: LogEventLevel.Verbose)
+                        .CreateLogger()))
             .AddTransient<IEventHandler<NotifyEvent>, NotifyEventHandler>()
-            .AddServiceBus()
-            .AddHostedService<ServiceBusReceiverService>()
+            .AddServiceBus(serviceBusConfiguration =>
+                serviceBusConfiguration.Listener = new ServiceBusListenerConfiguration
+                {
+                    Topics = new[]
+                    {
+                        new ServiceBusSubscriptionListenerConfiguration
+                        {
+                            Name = "notification-event",
+                            SubscriptionName = "notification-event",
+                            ConcurrencyLevel = 1,
+                            ConnectionStringSecret = new Secret
+                            {
+                                Identifier = "SERVICEBUS_CONNECTIONSTRING",
+                                Source = "Environment"
+                            }
+                        }
+                    }
+                })
+            .AddHostedService<ServiceBusListenerHostedService>()
+            .AddTransient<IServiceBusListener, NotifyEventServiceBusListener>()
             ;
     })
     .ConfigureAppConfiguration(builder =>

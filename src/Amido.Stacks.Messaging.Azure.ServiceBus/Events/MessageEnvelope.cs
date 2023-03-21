@@ -9,7 +9,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
     /// <see href="https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.servicebus.message?view=azure-dotnet"/>
     /// </summary>
     /// <typeparam name="T">The type of the underlying event</typeparam>
-    public class MessageEnvelope : IHasCorrelationId
+    public class MessageEnvelope : IMessageEnvelope, ICorrelationIdSettingStage, IMessageEnvelopeOptionalSettingStage
     {
         /// <summary>
         /// The session identifier for a session-aware entity
@@ -57,7 +57,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
         /// The date and time in UTC at which the message will be enqueued.
         /// This property returns the time in UTC; when setting the property, the supplied DateTime value must also be in UTC
         /// </summary>
-        public DateTime ScheduledEnqueueTimeUtc { get; private set; }
+        public DateTime? ScheduledEnqueueTimeUtc { get; private set; }
         /// <summary>
         /// The message’s "time to live" value.
         /// </summary>
@@ -71,93 +71,193 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
         /// </summary>
         public string ViaPartitionKey { get; private set; }
 
+        public static ICorrelationIdSettingStage CreateMessageEnvelope(object data)
+        {
+            return new MessageEnvelope(data);
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="data"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public MessageEnvelope(object data)
+        protected MessageEnvelope(object data)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
             UserProperties = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>());
         }
 
-        public MessageEnvelope WithUserProperties(IDictionary<string, object> userProperties)
+        public IMessageEnvelopeOptionalSettingStage WithUserProperties(IDictionary<string, object> userProperties)
         {
             UserProperties = new ReadOnlyDictionary<string, object>(userProperties);
             return this;
         }
 
-        public MessageEnvelope WithSessionId(string sessionId)
+        public IMessageEnvelopeOptionalSettingStage WithSessionId(string sessionId)
         {
             SessionId = sessionId;
             return this;
         }
 
-        public MessageEnvelope WithContentType(string contentType)
+        public IMessageEnvelopeOptionalSettingStage WithContentType(string contentType)
         {
             ContentType = contentType;
             return this;
         }
 
-        public MessageEnvelope WithCorrelationId(string correlationId)
+        public IMessageEnvelopeOptionalSettingStage WithCorrelationId(string correlationId)
         {
             CorrelationId = correlationId;
             return this;
         }
 
-        public MessageEnvelope WithLabel(string label)
+        public IMessageEnvelopeOptionalSettingStage WithLabel(string label)
         {
             Label = label;
             return this;
         }
 
-        public MessageEnvelope WithMessageId(string messageId)
+        public IMessageEnvelopeOptionalSettingStage WithMessageId(string messageId)
         {
             MessageId = messageId;
             return this;
         }
 
-        public MessageEnvelope WithPartitionKey(string partitionKey)
+        public IMessageEnvelopeOptionalSettingStage WithPartitionKey(string partitionKey)
         {
             PartitionKey = partitionKey;
             return this;
         }
 
-        public MessageEnvelope WithReplyTo(string replyTo)
+        public IMessageEnvelopeOptionalSettingStage WithReplyTo(string replyTo)
         {
             ReplyTo = replyTo;
             return this;
         }
 
-        public MessageEnvelope WithReplyToSessionId(string replyToSessionId)
+        public IMessageEnvelopeOptionalSettingStage WithReplyToSessionId(string replyToSessionId)
         {
             ReplyToSessionId = replyToSessionId;
             return this;
         }
 
-        public MessageEnvelope WithScheduledEnqueueTimeUtc(DateTime scheduledEnqueueTimeUtc)
+        public IMessageEnvelopeOptionalSettingStage WithScheduledEnqueueTimeUtc(DateTime scheduledEnqueueTimeUtc)
         {
             ScheduledEnqueueTimeUtc = scheduledEnqueueTimeUtc;
             return this;
         }
 
-        public MessageEnvelope WithTimeToLive(TimeSpan timeToLive)
+        public IMessageEnvelopeOptionalSettingStage WithTimeToLive(TimeSpan timeToLive)
         {
             TimeToLive = timeToLive;
             return this;
         }
 
-        public MessageEnvelope WithTo(string to)
+        public IMessageEnvelopeOptionalSettingStage WithTo(string to)
         {
             To = to;
             return this;
         }
 
-        public MessageEnvelope WithViaPartitionKey(string viaPartitionKey)
+        public IMessageEnvelopeOptionalSettingStage WithViaPartitionKey(string viaPartitionKey)
         {
             ViaPartitionKey = viaPartitionKey;
             return this;
         }
+
+        public IMessageEnvelope Build()
+        {
+            return this;
+        }
+    }
+
+    public interface ICorrelationIdSettingStage
+    {
+        IMessageEnvelopeOptionalSettingStage WithCorrelationId(string correlationId);
+    }
+
+    public interface IMessageEnvelopeOptionalSettingStage : IMessageBuildingStage
+    {
+        IMessageEnvelopeOptionalSettingStage WithUserProperties(IDictionary<string, object> userProperties);
+        IMessageEnvelopeOptionalSettingStage WithViaPartitionKey(string viaPartitionKey);
+        IMessageEnvelopeOptionalSettingStage WithTo(string to);
+        IMessageEnvelopeOptionalSettingStage WithTimeToLive(TimeSpan timeToLive);
+        IMessageEnvelopeOptionalSettingStage WithScheduledEnqueueTimeUtc(DateTime scheduledEnqueueTimeUtc);
+        IMessageEnvelopeOptionalSettingStage WithReplyToSessionId(string replyToSessionId);
+        IMessageEnvelopeOptionalSettingStage WithReplyTo(string replyTo);
+        IMessageEnvelopeOptionalSettingStage WithPartitionKey(string partitionKey);
+        IMessageEnvelopeOptionalSettingStage WithMessageId(string messageId);
+        IMessageEnvelopeOptionalSettingStage WithLabel(string label);
+        IMessageEnvelopeOptionalSettingStage WithContentType(string contentType);
+        IMessageEnvelopeOptionalSettingStage WithSessionId(string sessionId);
+    }
+
+    public interface IMessageBuildingStage
+    {
+        IMessageEnvelope Build();
+    }
+
+    public interface IMessageEnvelope
+    {
+        /// <summary>
+        /// The session identifier for a session-aware entity
+        /// </summary>
+        string SessionId { get; }
+
+        /// <summary>
+        /// The underlying event data
+        /// </summary>
+        object Data { get; }
+
+        /// <summary>
+        /// The "user properties" bag, which can be used for custom message metadata
+        /// </summary>
+        IReadOnlyDictionary<string, object> UserProperties { get; }
+
+        /// <summary>
+        /// The content type descriptor
+        /// </summary>
+        string ContentType { get; }
+        /// <summary>
+        /// The a correlation identifier
+        /// </summary>
+        string CorrelationId { get; }
+        /// <summary>
+        /// An application specific label
+        /// </summary>
+        string Label { get; }
+        /// <summary>
+        /// The MessageId to identify the message
+        /// </summary>
+        string MessageId { get; }
+        /// <summary>
+        /// A partition key for sending a message to a partitioned entity
+        /// </summary>
+        string PartitionKey { get; }
+        /// <summary>
+        /// The address of an entity to send replies to
+        /// </summary>
+        string ReplyTo { get; }
+        /// <summary>
+        /// The session identifier augmenting the ReplyTo address
+        /// </summary>
+        string ReplyToSessionId { get; }
+        /// <summary>
+        /// The date and time in UTC at which the message will be enqueued.
+        /// This property returns the time in UTC; when setting the property, the supplied DateTime value must also be in UTC
+        /// </summary>
+        DateTime? ScheduledEnqueueTimeUtc { get; }
+        /// <summary>
+        /// The message’s "time to live" value.
+        /// </summary>
+        TimeSpan? TimeToLive { get; }
+        /// <summary>
+        /// The "to" address.
+        /// </summary>
+        string To { get; }
+        /// <summary>
+        /// A partition key for sending a message into an entity via a partitioned transfer queue.
+        /// </summary>
+        string ViaPartitionKey { get; }
     }
 }

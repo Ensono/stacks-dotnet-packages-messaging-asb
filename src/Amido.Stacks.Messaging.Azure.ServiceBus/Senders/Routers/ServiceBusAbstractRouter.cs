@@ -21,9 +21,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
 
         public async Task RouteAsync(object msg)
         {
-            var type = GetMessageType(msg);
+            var router = GetRouter(msg.GetType());
 
-            var router = GetRouter(type);
+            await router.SendAsync(msg);
+        }
+
+        public async Task RouteAsync(IMessageEnvelope msg)
+        {
+            var router = GetRouter(msg.Data.GetType());
 
             await router.SendAsync(msg);
         }
@@ -31,26 +36,19 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
         public async Task RouteAsync(IEnumerable<object> msgs)
         {
             var msg = msgs.FirstOrDefault();
-            var type = GetMessageType(msg);
 
-             var router = GetRouter(type);
+            var router = GetRouter(msg.GetType());
 
             await router.SendAsync(msgs);
         }
 
-        private static Type GetMessageType(object msg)
+        public async Task RouteAsync(IEnumerable<IMessageEnvelope> msgs)
         {
-            Type type;
-            if (msg is MessageEnvelope messageEnvelope)
-            {
-                type = messageEnvelope.Data.GetType();
-            }
-            else
-            {
-                type = msg.GetType();
-            }
+            var msg = msgs.FirstOrDefault();
 
-            return type;
+            var router = GetRouter(msg.Data.GetType());
+
+            await router.SendAsync(msgs);
         }
 
         private T GetRouter(Type type)

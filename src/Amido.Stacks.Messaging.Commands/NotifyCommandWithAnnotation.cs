@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
+using Amido.Stacks.Application.CQRS.Commands;
 
 namespace Amido.Stacks.Messaging.Commands
 {

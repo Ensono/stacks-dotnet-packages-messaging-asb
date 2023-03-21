@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MessagingHost;
+namespace TestHost;
 
 /// <summary>
 ///     Allow use of ILogger<> at dependency registration level

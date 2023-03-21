@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amido.Stacks.Core.Operations;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -66,7 +67,67 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             }
         }
 
+        public async Task SendAsync(IMessageEnvelope message)
+        {
+            var enumerator = senders.GetEnumerator();
+            enumerator.MoveNext();
+            while (enumerator.Current != null)
+            {
+                try
+                {
+                    await enumerator.Current.SendAsync(message);
+                }
+                catch (JsonSerializationException ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(message)} to entity '{enumerator.Current.Alias}'");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(message)} to entity '{enumerator.Current.Alias}'");
+
+                    if (!enumerator.MoveNext())
+                        throw;
+
+                    logger.LogWarning($"Fallback: Sending message {GetMessageIdentifier(message)} to entity '{enumerator.Current.Alias}'");
+
+                    continue;
+                }
+
+                break;
+            }
+        }
+
         public async Task SendAsync(IEnumerable<object> messages)
+        {
+            var enumerator = senders.GetEnumerator();
+            enumerator.MoveNext();
+            while (enumerator.Current != null)
+            {
+                try
+                {
+                    await enumerator.Current.SendAsync(messages);
+                }
+                catch (JsonSerializationException ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to send message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+
+                    if (!enumerator.MoveNext())
+                        throw;
+
+                    logger.LogWarning($"Fallback: Sending message {GetMessageIdentifier(messages.FirstOrDefault())} to entity '{enumerator.Current.Alias}'");
+
+                    continue;
+                }
+
+                break;
+            }
+        }
+
+        public async Task SendAsync(IEnumerable<IMessageEnvelope> messages)
         {
             var enumerator = senders.GetEnumerator();
             enumerator.MoveNext();

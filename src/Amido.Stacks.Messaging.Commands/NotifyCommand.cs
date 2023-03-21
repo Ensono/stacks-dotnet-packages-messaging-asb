@@ -1,6 +1,6 @@
 ﻿using System;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Core.Operations;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 
 namespace Amido.Stacks.Messaging.Commands
 {

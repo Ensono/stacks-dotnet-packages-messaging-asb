@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Microsoft.Azure.ServiceBus;
@@ -42,7 +43,21 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders
             await senderClient.SendAsync(message);
         }
 
+        public async Task SendAsync(IMessageEnvelope item)
+        {
+            var message = messageBuilder.Build(item);
+            log.LogInformation($"Sending item '{message?.GetEnclosedMessageType()}' with MessageId '{message?.MessageId}' to '{senderClient.Path}'.");
+            await senderClient.SendAsync(message);
+        }
+
         public async Task SendAsync<T>(IEnumerable<T> items)
+        {
+            var messages = messageBuilder.Build(items).ToList();
+            log.LogInformation($"Sending items '{messages.FirstOrDefault().GetEnclosedMessageType()}' to '{senderClient.Path}'.");
+            await senderClient.SendAsync(messages);
+        }
+
+        public async Task SendAsync(IEnumerable<IMessageEnvelope> items)
         {
             var messages = messageBuilder.Build(items).ToList();
             log.LogInformation($"Sending items '{messages.FirstOrDefault().GetEnclosedMessageType()}' to '{senderClient.Path}'.");

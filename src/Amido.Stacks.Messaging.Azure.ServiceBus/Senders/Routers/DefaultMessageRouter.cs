@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
 {
@@ -30,7 +31,19 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             await sender.SendAsync(message);
         }
 
+        public async Task SendAsync(IMessageEnvelope message)
+        {
+            var sender = senders.First();
+            await sender.SendAsync(message);
+        }
+
         public async Task SendAsync(IEnumerable<object> messages)
+        {
+            var sender = senders.First();
+            await sender.SendAsync(messages);
+        }
+
+        public async Task SendAsync(IEnumerable<IMessageEnvelope> messages)
         {
             var sender = senders.First();
             await sender.SendAsync(messages);

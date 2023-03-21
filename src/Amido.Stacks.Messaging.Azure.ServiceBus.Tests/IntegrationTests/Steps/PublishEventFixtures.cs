@@ -1,9 +1,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Events;
@@ -60,7 +62,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.IntegrationTests.Steps
 
         public void TheCorrectEventIsSentToTheTopic()
         {
-            var eventPublisher = _provider.GetService<IEventPublisher>();
+            var eventPublisher = _provider.GetService<IApplicationEventPublisher>();
             eventPublisher.PublishAsync(new NotifyEvent(_correlationId, 321, "resourceId")).GetAwaiter().GetResult();
         }
 
@@ -82,7 +84,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.IntegrationTests.Steps
         {
             _testable.Received(1)
                 .Complete(Arg.Is<NotifyEvent>(applicationEvent => applicationEvent.OperationCode == 321
-                                                                  && applicationEvent.CorrelationId == _correlationId.ToString()));
+                                                                  && applicationEvent.CorrelationId == _correlationId));
         }
     }
 }

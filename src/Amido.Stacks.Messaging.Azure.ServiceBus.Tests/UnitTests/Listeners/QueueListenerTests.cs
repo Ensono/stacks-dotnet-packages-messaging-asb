@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Commands;
@@ -82,7 +84,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddServiceBus()
             ;
 
@@ -104,13 +106,13 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
         [Theory]
         [InlineData(nameof(JsonMessageSerializer))]
         [InlineData(nameof(CloudEventMessageSerializer))]
-        public async Task Given_A_Message_Is_Received_From_KnownType_Is_Sent_To_Right_Hanler(string serializer)
+        public async Task Given_A_Message_Is_Received_From_KnownType_Is_Sent_To_Right_Handler(string serializer)
         {
             //ARRANGE
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddServiceBus()
             ;
 

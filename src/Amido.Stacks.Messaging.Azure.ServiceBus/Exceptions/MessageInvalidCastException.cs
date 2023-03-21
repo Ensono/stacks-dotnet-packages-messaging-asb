@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
@@ -18,6 +19,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
         public MessageInvalidCastException(
             string exceptionMessage,
             Message context,
+            Exception innerException = null)
+            : base((int)ExceptionIds.InvalidCast, exceptionMessage, context, innerException)
+        {
+        }
+
+        public MessageInvalidCastException(
+            string exceptionMessage,
+            ServiceBusReceivedMessage context,
             Exception innerException = null)
             : base((int)ExceptionIds.InvalidCast, exceptionMessage, context, innerException)
         {

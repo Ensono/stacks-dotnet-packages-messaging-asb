@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Commands;
@@ -122,7 +125,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
         }
 
         [Fact]
-        public async Task GivenA_SingleQueue_NoRouting_All_Commands_Are_Routed_Equaly()
+        public async Task GivenA_SingleQueue_NoRouting_All_Commands_Are_Routed_Equally()
         {
             var guid = Guid.NewGuid();
 
@@ -143,7 +146,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
         }
 
         [Fact]
-        public async Task GivenA_SingleTopic_NoRouting_All_Events_Are_Routed_Equaly()
+        public async Task GivenA_SingleTopic_NoRouting_All_Events_Are_Routed_Equally()
         {
             var guid = Guid.NewGuid();
 
@@ -152,7 +155,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             config.Sender.Topics = config.Sender.Topics.Take(1).ToArray();
             services.AddServiceBus();
 
-            var eventPublisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
+            var eventPublisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
             await eventPublisher.PublishAsync(new NotifyEvent(guid, 2));
 
             await senderClients.First().Received(1).SendAsync(Arg.Is<Message>(m => m.CorrelationId == guid.ToString()));
@@ -162,7 +165,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
         }
 
         [Fact]
-        public async Task Given_MultipleQueues_SingleRoute_All_Commands_Are_Routed_Equaly()
+        public async Task Given_MultipleQueues_SingleRoute_All_Commands_Are_Routed_Equally()
         {
             var guid = Guid.NewGuid();
 
@@ -185,7 +188,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
         }
 
         [Fact]
-        public async Task Given_MultipleTopics_SingleRoute_All_Events_Are_Routed_Equaly()
+        public async Task Given_MultipleTopics_SingleRoute_All_Events_Are_Routed_Equally()
         {
             var guid = Guid.NewGuid();
 
@@ -193,7 +196,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             config.Sender.Routing.Topics = new[] { route };
             services.AddServiceBus();
 
-            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
             await publisher.PublishAsync(new NotifyEvent(guid, 1));
 
             Assert.True(config.Sender.Topics.Length > 1);
@@ -226,7 +229,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             services.AddServiceBus();
 
             //ACT
-            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
 
             await Assert.ThrowsAsync<Exception>(() => publisher.PublishAsync(new NotifyEvent(guid, 1)));
         }
@@ -279,7 +282,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             services.AddServiceBus();
 
             //ACT
-            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
             await publisher.PublishAsync(new NotifyEvent(guid1, 1));
             await publisher.PublishAsync(new DummyEvent(guid2));
 

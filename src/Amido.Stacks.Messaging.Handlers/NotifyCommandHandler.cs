@@ -5,7 +5,7 @@ using Amido.Stacks.Messaging.Handlers.TestDependency;
 
 namespace Amido.Stacks.Messaging.Handlers
 {
-    public class NotifyCommandHandler : ICommandHandler<NotifyCommand, bool>
+    public class NotifyCommandHandler : IServiceBusCommandHandler<NotifyCommand, bool>
     {
         private readonly ITestable<NotifyCommand> _testable;
 

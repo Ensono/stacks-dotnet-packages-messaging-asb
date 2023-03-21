@@ -2,7 +2,7 @@
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Commands
 {
-    public interface ICommand : IOperationContext
+    public interface IServiceBusCommand : IOperationContext
     {
     }
 }

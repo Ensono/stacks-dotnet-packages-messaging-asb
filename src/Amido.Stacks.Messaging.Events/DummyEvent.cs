@@ -1,21 +1,21 @@
 ﻿using System;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
 
 namespace Amido.Stacks.Messaging.Events
 {
-    public class DummyEvent : IEvent
+    public class DummyEvent : IApplicationEvent
     {
         public DummyEvent() { }
 
         public DummyEvent(Guid correlationId)
         {
-            this.CorrelationId = correlationId.ToString();
+            this.CorrelationId = correlationId;
         }
 
         public int EventCode => 9871;
 
         public int OperationCode { get; }
 
-        public string CorrelationId { get; }
+        public Guid CorrelationId { get; }
     }
 }

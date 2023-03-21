@@ -36,21 +36,22 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests
             });
 
             // Arrange
-            var sut = new MessageEnvelope(notifyEvent);
-            sut.WithCorrelationId(correlationId.ToString());
-            sut.WithLabel(label);
-            sut.WithTo(to);
-            sut.WithContentType(contentType);
-            sut.WithMessageId(messageId);
-            sut.WithScheduledEnqueueTimeUtc(scheduledEnqueueTimeUtc);
-            sut.WithPartitionKey(partitionKey);
-            sut.WithReplyTo(replyTo);
-            sut.WithSessionId(sessionId);
-            sut.WithReplyToSessionId(replyToSessionId);
-            sut.WithTimeToLive(timeToLive);
-            sut.WithMessageId(messageId);
-            sut.WithViaPartitionKey(viaPartitionKey);
-            sut.WithUserProperties(userProperties);
+            var sut = MessageEnvelope.CreateMessageEnvelope(notifyEvent)
+                .WithCorrelationId(correlationId.ToString())
+                .WithLabel(label)
+                .WithTo(to)
+                .WithContentType(contentType)
+                .WithMessageId(messageId)
+                .WithScheduledEnqueueTimeUtc(scheduledEnqueueTimeUtc)
+                .WithPartitionKey(partitionKey)
+                .WithReplyTo(replyTo)
+                .WithSessionId(sessionId)
+                .WithReplyToSessionId(replyToSessionId)
+                .WithTimeToLive(timeToLive)
+                .WithMessageId(messageId)
+                .WithViaPartitionKey(viaPartitionKey)
+                .WithUserProperties(userProperties)
+                .Build();
 
             // Act
 

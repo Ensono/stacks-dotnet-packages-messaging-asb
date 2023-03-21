@@ -23,9 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Amido.Stacks.Messaging.Hand
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestFunction", "TestFunction\TestFunction.csproj", "{0DF63725-F2FA-4487-BA68-5D0283CB3F5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "MessagingHost\TestHost.csproj", "{D56039A8-4BCE-4053-BFD9-41B877C822E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestHost", "MessagingHost\TestHost.csproj", "{D56039A8-4BCE-4053-BFD9-41B877C822E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCommon", "TestCommon\TestCommon.csproj", "{62AC14C2-99E1-4A2A-B210-CF3819757E49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCommon", "TestCommon\TestCommon.csproj", "{62AC14C2-99E1-4A2A-B210-CF3819757E49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

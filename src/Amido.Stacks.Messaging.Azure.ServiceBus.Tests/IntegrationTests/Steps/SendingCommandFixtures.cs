@@ -1,9 +1,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Handlers;
@@ -34,7 +36,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.IntegrationTests.Steps
             var services = new ServiceCollection()
                 .AddLogging()
                 .AddSecrets()
-                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddTransient(_ => _testable)
                 .Configure<ServiceBusConfiguration>(configurationRoot.GetSection("ServiceBus"))
                 .AddServiceBus()

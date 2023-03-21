@@ -27,7 +27,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Hosts
 
             await Task.WhenAll(listeners.Select(l => l.StartAsync()));
 
-            log.LogInformation("Service Bus Listener Host has starteded.");
+            log.LogInformation("Service Bus Listener Host has started.");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

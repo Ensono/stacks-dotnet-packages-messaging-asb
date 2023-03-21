@@ -1,17 +1,17 @@
-﻿using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
+﻿using Amido.Stacks.Application.CQRS.ApplicationEvents;
 
 namespace TestCommon
 {
-    public class NotifyEvent : IEvent
+    public class NotifyEvent : IApplicationEvent
     {
         public int OperationCode { get; }
-        public string CorrelationId { get; }
+        public new Guid CorrelationId { get; }
         public int EventCode { get; }
 
         public NotifyEvent(int operationCode, string correlationId, int eventCode)
         {
             OperationCode = operationCode;
-            CorrelationId = correlationId;
+            CorrelationId = Guid.Parse(correlationId);
             EventCode = eventCode;
         }
     }

@@ -2,8 +2,8 @@
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Commands
 {
-    public interface ICommandDispatcher
+    public interface IServiceBusCommandDispatcher
     {
-        Task SendAsync(ICommand command);
+        Task SendAsync(IServiceBusCommand command);
     }
 }

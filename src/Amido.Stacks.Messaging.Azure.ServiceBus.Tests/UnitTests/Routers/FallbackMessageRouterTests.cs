@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Commands;
@@ -137,7 +140,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
             senderClients.Single(s => s.Path == route.SendTo.First()).SendAsync(Arg.Any<Message>()).Returns(Task.FromException(new Exception("failed")));
 
             //ACT
-            var publisher = services.BuildServiceProvider().GetRequiredService<IEventPublisher>();
+            var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
             await publisher.PublishAsync(new NotifyEvent(guid, 1));
 
             //ASSERT

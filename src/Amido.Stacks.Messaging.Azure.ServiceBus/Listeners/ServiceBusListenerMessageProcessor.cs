@@ -54,9 +54,9 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
             var parsedContent = messageReader.Read<T>(message);
 
             // TODO: this validation only works for IOperationContext
-            if (!config.DisableMessageValidation && parsedContent is IOperationContext)
+            if (!config.DisableMessageValidation && parsedContent is IOperationContext context)
             {
-                validator.Validate(parsedContent as IOperationContext);
+                validator.Validate(context);
             }
 
             var resolved = messageHandlerFactory.CreateHandlerFor(parsedContent.GetType());

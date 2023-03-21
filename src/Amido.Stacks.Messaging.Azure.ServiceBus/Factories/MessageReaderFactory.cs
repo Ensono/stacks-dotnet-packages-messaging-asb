@@ -26,7 +26,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                     x.GetType().Name == name ||
                     x.GetType().FullName == name);
 
-            return reader as IMessageReader;
+            return (IMessageReader)reader;
         }
     }
 }
