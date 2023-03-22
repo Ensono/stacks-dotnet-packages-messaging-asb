@@ -6,19 +6,20 @@ namespace Amido.Stacks.Messaging.Commands
 {
     public class NotifyCommand : ICommand
     {
-        private Guid correlationId;
+        private Guid _correlationId;
 
         public NotifyCommand(Guid correlationId, string testMember)
         {
             OperationCode = 666;
-            CorrelationId = correlationId.ToString();
+            _correlationId = correlationId;
+            CorrelationId = _correlationId.ToString();
             TestMember = testMember;
         }
 
         public string TestMember { get; }
         public int OperationCode { get; }
 
-        Guid IOperationContext.CorrelationId => correlationId;
+        Guid IOperationContext.CorrelationId => _correlationId;
 
         public string CorrelationId { get; }
     }

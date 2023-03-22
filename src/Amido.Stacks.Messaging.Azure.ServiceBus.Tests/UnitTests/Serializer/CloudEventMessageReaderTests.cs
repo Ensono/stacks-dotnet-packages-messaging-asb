@@ -22,7 +22,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 
             var message = serializer.Build<ICommand>(new NotifyCommand(correlationId, testMember));
 
-            var result = serializer.Read<ICommand>(message) as NotifyCommand;
+            var result = serializer.Read(message) as NotifyCommand;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyCommand));
@@ -38,7 +38,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
             var correlationId = Guid.NewGuid();
             var message = serializer.Build(new NotifyEvent(correlationId, 321, "session-id"));
 
-            var result = serializer.Read<IApplicationEvent>(message) as NotifyEvent;
+            var result = serializer.Read(message) as NotifyEvent;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyEvent));

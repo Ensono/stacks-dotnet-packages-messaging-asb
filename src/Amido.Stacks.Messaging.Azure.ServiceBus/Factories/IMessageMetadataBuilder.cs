@@ -7,6 +7,6 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
     public interface IMessageMetadataBuilder
     {
         MessageMetadata<T> Build<T>(Message message) where T : class;
-        MessageMetadata<T> Build<T>(ServiceBusReceivedMessage message) where T : class;
+        ServiceBusReceivedMessageMetaData<T> Build<T>(ServiceBusReceivedMessage message) where T : class;
     }
 }

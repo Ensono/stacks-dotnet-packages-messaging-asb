@@ -130,12 +130,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
         /// cast the result to the type of T.
         /// This operation will throw an exception if the enclosed message type is not convertible to the type of T.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="message"></param>
         /// <returns></returns>
-        public T Read<T>(Message message)
+        public object Read(Message message)
         {
-            return ReadMessageBody<T>(message);
+            return ReadMessageBody<object>(message);
         }
 
         public T ReadMessageBody<T>(Message message)
@@ -155,7 +154,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                     throw new MessageBodyIsNullException($"The body of the message {message.MessageId} is null.", message);
                 }
 
-                return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), type);
+                return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), type, 
+                    new JsonSerializerSettings
+                    {
+                        MissingMemberHandling = MissingMemberHandling.Error
+                    });
             }
             catch (InvalidCastException ex)
             {
@@ -178,9 +181,9 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
             return type;
         }
 
-        public T Read<T>(ServiceBusReceivedMessage message)
+        public object Read(ServiceBusReceivedMessage message)
         {
-            return ReadMessageBody<T>(message);
+            return ReadMessageBody<object>(message);
         }
 
         public T ReadMessageBody<T>(ServiceBusReceivedMessage message)

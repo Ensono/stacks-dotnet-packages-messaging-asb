@@ -36,7 +36,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.IntegrationTests.Steps
             var services = new ServiceCollection()
                 .AddLogging()
                 .AddSecrets()
-                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddTransient(_ => _testable)
                 .Configure<ServiceBusConfiguration>(configurationRoot.GetSection("ServiceBus"))
                 .AddServiceBus()

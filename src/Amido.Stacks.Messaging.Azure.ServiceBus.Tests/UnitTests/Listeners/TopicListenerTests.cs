@@ -85,7 +85,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IEventHandler<NotifyEvent>, NotifyEventHandler>()
+                .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>()
                 .AddServiceBus()
             ;
 
@@ -113,7 +113,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IEventHandler<NotifyEvent>, NotifyEventHandler>()
+                .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>()
                 .AddServiceBus()
             ;
 

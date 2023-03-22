@@ -50,7 +50,7 @@ public class Startup : FunctionsStartup
                         new ServiceBusTopicConfiguration()
                         {
                             Name = "notification-event",
-                            Serializer = "JsonMessageSerializer",
+                            Serializer = "CloudEventMessageSerializer",
                             ConnectionStringSecret = new Secret
                             {
                                 Identifier = "SERVICEBUS_CONNECTIONSTRING",

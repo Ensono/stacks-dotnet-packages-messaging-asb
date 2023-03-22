@@ -5,7 +5,7 @@ namespace TestCommon
     public class NotifyEvent : IApplicationEvent
     {
         public int OperationCode { get; }
-        public new Guid CorrelationId { get; }
+        public Guid CorrelationId { get; }
         public int EventCode { get; }
 
         public NotifyEvent(int operationCode, string correlationId, int eventCode)

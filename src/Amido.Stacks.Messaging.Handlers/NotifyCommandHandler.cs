@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
+using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Handlers.TestDependency;
 
 namespace Amido.Stacks.Messaging.Handlers
 {
-    public class NotifyCommandHandler : IServiceBusCommandHandler<NotifyCommand, bool>
+    public class NotifyCommandHandler : ICommandHandler<NotifyCommand, bool>
     {
         private readonly ITestable<NotifyCommand> _testable;
 

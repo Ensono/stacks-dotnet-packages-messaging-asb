@@ -25,7 +25,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 
             message.SetEnclosedMessageType(typeof(JsonMessageReaderTests));
 
-            ShouldThrowExtensions.ShouldThrow<MessageParsingException>(() => parser.Read<NotifyCommand>(message) as NotifyCommand);
+            ShouldThrowExtensions.ShouldThrow<MessageParsingException>(() => parser.Read(message));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 
             message.SetEnclosedMessageType(typeof(NotifyCommand));
 
-            var result = parser.Read<NotifyCommand>(message) as NotifyCommand;
+            var result = parser.Read(message) as NotifyCommand;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyCommand));
@@ -61,7 +61,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 
             message.SetEnclosedMessageType(typeof(NotifyEvent));
 
-            var result = parser.Read<NotifyEvent>(message) as NotifyEvent;
+            var result = parser.Read(message) as NotifyEvent;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyEvent));

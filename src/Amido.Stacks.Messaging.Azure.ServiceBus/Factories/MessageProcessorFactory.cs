@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
-using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Core.Operations;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
@@ -27,24 +25,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                 return CreateCustomMessageProcessor(configuration);
             }
 
-            if (configuration is ServiceBusSubscriptionListenerConfiguration)
-            {
-                return new ServiceBusListenerMessageProcessor<IApplicationEvent>(
-                    serviceProvider.GetRequiredService<ILogger<ServiceBusListenerMessageProcessor<IApplicationEvent>>>(),
-                    serviceProvider.GetRequiredService<IMessagerReaderFactory>(),
-                    serviceProvider.GetRequiredService<IMessageHandlerFactory>(),
-                    serviceProvider.GetRequiredService<IValidator<IOperationContext>>(),
-                    configuration);
-            }
-            else
-            {
-                return new ServiceBusListenerMessageProcessor<ICommand>(
-                    serviceProvider.GetRequiredService<ILogger<ServiceBusListenerMessageProcessor<ICommand>>>(),
-                    serviceProvider.GetRequiredService<IMessagerReaderFactory>(),
-                    serviceProvider.GetRequiredService<IMessageHandlerFactory>(),
-                    serviceProvider.GetRequiredService<IValidator<IOperationContext>>(),
-                    configuration);
-            }
+            return new ServiceBusListenerMessageProcessor(
+                serviceProvider.GetRequiredService<ILogger<ServiceBusListenerMessageProcessor>>(),
+                serviceProvider.GetRequiredService<IMessagerReaderFactory>(),
+                serviceProvider.GetRequiredService<IMessageHandlerFactory>(),
+                serviceProvider.GetRequiredService<IValidator<IOperationContext>>(),
+                configuration);
         }
 
         private IMessageProcessor CreateCustomMessageProcessor(ServiceBusQueueListenerConfiguration configuration)

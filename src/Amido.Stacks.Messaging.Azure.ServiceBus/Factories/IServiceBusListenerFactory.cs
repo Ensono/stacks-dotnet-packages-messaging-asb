@@ -5,6 +5,6 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 {
     public interface IServiceBusListenerFactory
     {
-        IMessageListener Create<T>(ServiceBusQueueListenerConfiguration configuration);
+        IMessageListener Create(ServiceBusQueueListenerConfiguration configuration);
     }
 }

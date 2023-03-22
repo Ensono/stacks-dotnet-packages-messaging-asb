@@ -84,7 +84,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddServiceBus()
             ;
 
@@ -112,7 +112,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IServiceBusCommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
+                .AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>()
                 .AddServiceBus()
             ;
 

@@ -5,9 +5,9 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
 {
     public interface IMessageReader
     {
-        T Read<T>(Message message);
+        object Read(Message message);
         T ReadMessageBody<T>(Message message);
-        T Read<T>(ServiceBusReceivedMessage message);
+        object Read(ServiceBusReceivedMessage message);
         T ReadMessageBody<T>(ServiceBusReceivedMessage message);
     }
 }

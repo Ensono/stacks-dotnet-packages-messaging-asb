@@ -12,16 +12,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
 {
-    public class ServiceBusListenerMessageProcessor<T> : IMessageProcessor
+    public class ServiceBusListenerMessageProcessor : IMessageProcessor
     {
         private readonly ServiceBusQueueListenerConfiguration config;
-        private readonly ILogger<ServiceBusListenerMessageProcessor<T>> log;
+        private readonly ILogger<ServiceBusListenerMessageProcessor> log;
         private readonly IMessagerReaderFactory messageReaderFactory;
         private readonly IMessageHandlerFactory messageHandlerFactory;
         private readonly IValidator<IOperationContext> validator;
 
         public ServiceBusListenerMessageProcessor(
-            ILogger<ServiceBusListenerMessageProcessor<T>> log,
+            ILogger<ServiceBusListenerMessageProcessor> log,
             IMessagerReaderFactory messageReaderFactory,
             IMessageHandlerFactory messageHandlerFactory,
             IValidator<IOperationContext> validator,
@@ -50,8 +50,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
                 throw new Exception("No serializer has been identified to parse the message");
             }
 
-            var messageReader = messageReaderFactory.CreateReader<T>(serializerName);
-            var parsedContent = messageReader.Read<T>(message);
+            var messageReader = messageReaderFactory.CreateReader(serializerName);
+            var parsedContent = messageReader.Read(message);
 
             // TODO: this validation only works for IOperationContext
             if (!config.DisableMessageValidation && parsedContent is IOperationContext context)

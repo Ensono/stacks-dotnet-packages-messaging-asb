@@ -68,20 +68,20 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
         /// <exception cref="Exception">The exception thrown if no serializer can be found for the message</exception>
         protected virtual async Task ProcessMessagesAsync(Message message, CancellationToken cancellationToken)
         {
-            var serializerName = message.GetSerializerType() ?? _configuration.Serializer;
+            var serializerName = message.GetSerializerType() ?? _configuration.Value.Serializer;
             if (string.IsNullOrEmpty(serializerName))
             {
                 throw new Exception("No serializer has been identified to parse the message");
             }
 
-            var messageReader = _messageReaderFactory.CreateReader<T>(serializerName);
+            var messageReader = _messageReaderFactory.CreateReader(serializerName);
             if (messageReader == null)
             {
                 throw new Exception($"No reader has been found for '{serializerName}'");
             }
 
-            var parsedContent = messageReader.Read<T>(message);
-            await UpdateMessageStatus(await HandleMessageAsync(parsedContent), message.SystemProperties.LockToken);
+            var parsedContent = messageReader.Read(message);
+            await UpdateMessageStatus(await HandleMessageAsync((T)parsedContent), message.SystemProperties.LockToken);
         }
 
         private async Task UpdateMessageStatus(EventStatus eventStatus, string lockToken)
@@ -140,7 +140,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
         {
             if (_subcriptionClient?.IsClosedOrClosing != false)
             {
-                Logger.LogInformation($"Listener was already Stopped for entity '{_configuration.Name}'.");
+                Logger.LogInformation($"Listener was already Stopped for entity '{_configuration.Value.Name}'.");
             }
 
             await _subcriptionClient?.CloseAsync();

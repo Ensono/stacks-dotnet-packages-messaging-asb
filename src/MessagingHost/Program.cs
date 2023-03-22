@@ -13,15 +13,22 @@ using TestCommon;
 using TestHost;
 using TestHost.ServiceBusListener;
 
-const string serviceBusConfigurationKeyName = "ServiceBusConfiguration";
-
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
         services.AddSecrets()
             .AddTransient(typeof(ILogger<>), typeof(LogAdapter<>))
-            .Configure<ServiceBusConfiguration>(
-                hostContext.Configuration.GetSection(serviceBusConfigurationKeyName))
+            //.Configure<ServiceBusSubscriptionListenerConfiguration>(serviceBusConfiguration =>
+            //{
+            //    serviceBusConfiguration.Name = "notification-event";
+            //    serviceBusConfiguration.SubscriptionName = "notification-event";
+            //    serviceBusConfiguration.ConcurrencyLevel = 1;
+            //    serviceBusConfiguration.ConnectionStringSecret = new Secret
+            //    {
+            //        Identifier = "SERVICEBUS_CONNECTIONSTRING",
+            //        Source = "Environment"
+            //    };
+            //})
             .AddOptions()
             .AddLogging(loggingBuilder =>
                 loggingBuilder.AddSerilog(
@@ -54,8 +61,8 @@ var host = Host.CreateDefaultBuilder(args)
                         }
                     }
                 })
-            .AddHostedService<ServiceBusListenerHostedService>()
-            .AddTransient<IServiceBusListener, NotifyEventServiceBusListener>()
+            //.AddHostedService<ServiceBusListenerHostedService>()
+            //.AddTransient<IServiceBusListener, NotifyEventServiceBusListener>()
             ;
     })
     .ConfigureAppConfiguration(builder =>

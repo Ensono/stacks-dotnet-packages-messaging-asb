@@ -7,4 +7,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
         Task StartAsync();
         Task StopAsync();
     }
+
+    public interface IMessageListener<T> : IMessageListener
+    {
+    }
 }

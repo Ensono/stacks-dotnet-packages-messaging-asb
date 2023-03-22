@@ -291,8 +291,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Extensions
 
             foreach (var queue in queues)
             {
-                //services.AddSingleton(factory.Create<IServiceBusCommand>(queue));
-                services.AddSingleton(factory.Create<ICommand>(queue));
+                services.AddSingleton(factory.Create(queue));
             }
 
             return true;
@@ -307,8 +306,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Extensions
 
             foreach (var topic in topics)
             {
-                //services.AddSingleton(factory.Create<IEvent>(topic));
-                services.AddSingleton(factory.Create<IApplicationEvent>(topic));
+                services.AddSingleton(factory.Create(topic));
             }
 
             return true;

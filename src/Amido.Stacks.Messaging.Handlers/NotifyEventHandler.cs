@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
+using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Messaging.Events;
 using Amido.Stacks.Messaging.Handlers.TestDependency;
 
 namespace Amido.Stacks.Messaging.Handlers
 {
-    public class NotifyEventHandler : IEventHandler<NotifyEvent>
+    public class NotifyEventHandler : IApplicationEventHandler<NotifyEvent>
     {
         private readonly ITestable<NotifyEvent> _testable;
 

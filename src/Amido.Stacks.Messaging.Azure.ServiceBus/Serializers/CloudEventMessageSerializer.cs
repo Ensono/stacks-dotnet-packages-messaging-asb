@@ -148,15 +148,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
         /// cast the result to the type of T.
         /// This operation will throw an exception if the enclosed message type is not convertible to the type of T.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="message"></param>
         /// <returns></returns>
-        public T Read<T>(Message message)
+        public object Read(Message message)
         {
             try
             {
                 var cloudEvent = ReadMessageBody<CloudEvent>(message);
-                return (T)cloudEvent.Data;
+                return cloudEvent.Data;
             }
             catch (InvalidCastException ex)
             {
@@ -222,12 +221,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
             return type;
         }
 
-        public T Read<T>(ServiceBusReceivedMessage message)
+        public object Read(ServiceBusReceivedMessage message)
         {
             try
             {
                 var cloudEvent = ReadMessageBody<CloudEvent>(message);
-                return (T)cloudEvent.Data;
+                return cloudEvent.Data;
             }
             catch (InvalidCastException ex)
             {

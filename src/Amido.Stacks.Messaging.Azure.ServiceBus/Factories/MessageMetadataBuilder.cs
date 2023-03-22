@@ -23,7 +23,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                 throw new Exception("No serializer has been identified to parse the message");
             }
 
-            var messageReader = _messageReaderFactory.CreateReader<T>(serializerName);
+            var messageReader = _messageReaderFactory.CreateReader(serializerName);
             if (messageReader == null)
             {
                 throw new Exception($"No reader has been found for '{serializerName}'");
@@ -31,26 +31,26 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 
             var parsedContent = messageReader.ReadMessageBody<T>(message);
             return new MessageMetadata<T>(parsedContent)
+                .WithContentType(message.ContentType)
                 .WithCorrelationId(message.CorrelationId)
                 .WithExpiresAtUtc(message)
-                .WithReplyToSessionId(message.ReplyToSessionId)
+                .WithLabel(message.Label)
                 .WithMessageId(message.MessageId)
+                .WithPartitionKey(message.PartitionKey)
                 .WithReplyTo(message.ReplyTo)
                 .WithReplyToSessionId(message.ReplyToSessionId)
-                .WithContentType(message.ContentType)
-                .WithLabel(message.Label)
-                .WithPartitionKey(message.PartitionKey)
                 .WithScheduledEnqueueTimeUtc(message.ScheduledEnqueueTimeUtc)
+                .WithSessionId(message.SessionId)
+                .WithSize(message.Size)
+                .WithSystemProperties(message.SystemProperties)
                 .WithTimeToLive(message.TimeToLive)
                 .WithTo(message.To)
                 .WithUserProperties(message.UserProperties)
-                .WithSessionId(message.SessionId)
                 .WithViaPartitionKey(message.ViaPartitionKey)
-                .WithSystemProperties(message.SystemProperties)
-                .WithSize(message.Size);
+                ;
         }
 
-        public MessageMetadata<T> Build<T>(ServiceBusReceivedMessage message) where T : class
+        public ServiceBusReceivedMessageMetaData<T> Build<T>(ServiceBusReceivedMessage message) where T : class
         {
             var serializerName = message.GetSerializerType();
             if (string.IsNullOrEmpty(serializerName))
@@ -58,14 +58,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                 throw new Exception("No serializer has been identified to parse the message");
             }
 
-            var messageReader = _messageReaderFactory.CreateReader<T>(serializerName);
+            var messageReader = _messageReaderFactory.CreateReader(serializerName);
             if (messageReader == null)
             {
                 throw new Exception($"No reader has been found for '{serializerName}'");
             }
 
             var parsedContent = messageReader.ReadMessageBody<T>(message);
-            return new MessageMetadata<T>(parsedContent)
+            return new ServiceBusReceivedMessageMetaData<T>(parsedContent)
                 .WithApplicationProperties(message.ApplicationProperties)
                 .WithContentType(message.ContentType)
                 .WithCorrelationId(message.CorrelationId)
@@ -89,7 +89,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                 .WithSubject(message.Subject)
                 .WithTimeToLive(message.TimeToLive)
                 .WithTo(message.To)
-                .WithTransactionPartitionKey(message.TransactionPartitionKey);
+                .WithTransactionPartitionKey(message.TransactionPartitionKey)
+                ;
         }
     }
 }
