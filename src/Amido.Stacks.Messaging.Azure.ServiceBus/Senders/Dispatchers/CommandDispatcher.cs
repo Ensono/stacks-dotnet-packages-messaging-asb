@@ -19,6 +19,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Dispatchers
             this._log = log;
             this.routing = routing;
         }
+
         public async Task SendAsync(IServiceBusCommand command)
         {
             _log.LogInformation($"Dispatching command {command.CorrelationId}");

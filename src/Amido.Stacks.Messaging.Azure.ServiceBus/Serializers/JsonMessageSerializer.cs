@@ -14,7 +14,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
 {
     public class JsonMessageSerializer : IMessageReader, IMessageBuilder
     {
-        private const string DEFAULT_CONTENT_TYPE = "application/json;charset=utf-8";
+        private const string DefaultContentType = "application/json;charset=utf-8";
 
         public Message Build<T>(T body)
         {
@@ -45,7 +45,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
             var message = new Message
             {
                 CorrelationId = $"{correlationId}",
-                ContentType = DEFAULT_CONTENT_TYPE,
+                ContentType = DefaultContentType,
                 Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(body))
             };
 
@@ -63,7 +63,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                 message.CorrelationId = envelope.CorrelationId;
             }
 
-            message.ContentType = !string.IsNullOrEmpty(envelope.ContentType) ? envelope.ContentType : DEFAULT_CONTENT_TYPE;
+            message.ContentType = !string.IsNullOrEmpty(envelope.ContentType) ? envelope.ContentType : DefaultContentType;
 
             if (!string.IsNullOrEmpty(envelope.Label))
             {
@@ -203,7 +203,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                     throw new MessageBodyIsNullException($"The body of the message {message.MessageId} is null.", message);
                 }
 
-                return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body.ToArray()), type);
+                return (T)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body.ToArray()), type,
+                    new JsonSerializerSettings
+                    {
+                        MissingMemberHandling = MissingMemberHandling.Error
+                    });
             }
             catch (InvalidCastException ex)
             {

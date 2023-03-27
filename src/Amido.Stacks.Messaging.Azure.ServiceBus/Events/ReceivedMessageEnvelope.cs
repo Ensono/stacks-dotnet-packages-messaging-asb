@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
 {
-    public class MessageMetadata<T> where T : class
+    public class ReceivedMessageEnvelope<T> where T : class
     {
         /// <summary>
         /// The underlying event data
@@ -66,13 +66,13 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
         /// An application specific label
         /// </summary>
         public string Label { get; private set; }
-        
+
         /// <summary>
         /// The date and time in UTC at which the message will be enqueued.
         /// This property returns the time in UTC; when setting the property, the supplied DateTime value must also be in UTC
         /// </summary>
         public DateTime? ScheduledEnqueueTimeUtc { get; private set; }
-        
+
         /// <summary>
         /// A partition key for sending a message into an entity via a partitioned transfer queue.
         /// </summary>
@@ -93,13 +93,13 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
         /// </summary>
         public DateTime? ExpiresAtUtc { get; private set; }
 
-        public MessageMetadata<T> WithSize(long size)
+        public ReceivedMessageEnvelope<T> WithSize(long size)
         {
             Size = size;
             return this;
         }
 
-        public MessageMetadata<T> WithExpiresAtUtc(Message message)
+        public ReceivedMessageEnvelope<T> WithExpiresAtUtc(Message message)
         {
             try
             {
@@ -113,91 +113,91 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
             return this;
         }
 
-        public MessageMetadata<T> WithSystemProperties(Message.SystemPropertiesCollection systemProperties)
+        public ReceivedMessageEnvelope<T> WithSystemProperties(Message.SystemPropertiesCollection systemProperties)
         {
             SystemProperties = systemProperties;
             return this;
         }
 
-        public MessageMetadata<T> WithUserProperties(IDictionary<string, object> userProperties)
+        public ReceivedMessageEnvelope<T> WithUserProperties(IDictionary<string, object> userProperties)
         {
             UserProperties = new ReadOnlyDictionary<string, object>(userProperties);
             return this;
         }
 
-        public MessageMetadata<T> WithLabel(string label)
+        public ReceivedMessageEnvelope<T> WithLabel(string label)
         {
             Label = label;
             return this;
         }
 
-        public MessageMetadata<T> WithScheduledEnqueueTimeUtc(DateTime scheduledEnqueueTimeUtc)
+        public ReceivedMessageEnvelope<T> WithScheduledEnqueueTimeUtc(DateTime scheduledEnqueueTimeUtc)
         {
             ScheduledEnqueueTimeUtc = scheduledEnqueueTimeUtc;
             return this;
         }
 
-        public MessageMetadata<T> WithTimeToLive(TimeSpan timeToLive)
+        public ReceivedMessageEnvelope<T> WithTimeToLive(TimeSpan timeToLive)
         {
             TimeToLive = timeToLive;
             return this;
         }
 
-        public MessageMetadata<T> WithTo(string to)
+        public ReceivedMessageEnvelope<T> WithTo(string to)
         {
             To = to;
             return this;
         }
 
-        public MessageMetadata<T> WithViaPartitionKey(string viaPartitionKey)
+        public ReceivedMessageEnvelope<T> WithViaPartitionKey(string viaPartitionKey)
         {
             ViaPartitionKey = viaPartitionKey;
             return this;
         }
 
-        public MessageMetadata<T> WithContentType(string contentType)
+        public ReceivedMessageEnvelope<T> WithContentType(string contentType)
         {
             ContentType = contentType;
             return this;
         }
 
-        public MessageMetadata<T> WithCorrelationId(string correlationId)
+        public ReceivedMessageEnvelope<T> WithCorrelationId(string correlationId)
         {
             CorrelationId = correlationId;
             return this;
         }
 
-        public MessageMetadata<T> WithMessageId(string messageId)
+        public ReceivedMessageEnvelope<T> WithMessageId(string messageId)
         {
             MessageId = messageId;
             return this;
         }
 
-        public MessageMetadata<T> WithPartitionKey(string partitionKey)
+        public ReceivedMessageEnvelope<T> WithPartitionKey(string partitionKey)
         {
             PartitionKey = partitionKey;
             return this;
         }
 
-        public MessageMetadata<T> WithReplyTo(string replyTo)
+        public ReceivedMessageEnvelope<T> WithReplyTo(string replyTo)
         {
             ReplyTo = replyTo;
             return this;
         }
 
-        public MessageMetadata<T> WithSessionId(string sessionId)
+        public ReceivedMessageEnvelope<T> WithSessionId(string sessionId)
         {
             SessionId = sessionId;
             return this;
         }
 
-        public MessageMetadata<T> WithReplyToSessionId(string replyToSessionId)
+        public ReceivedMessageEnvelope<T> WithReplyToSessionId(string replyToSessionId)
         {
             ReplyToSessionId = replyToSessionId;
             return this;
         }
 
-        public MessageMetadata(T data)
+        public ReceivedMessageEnvelope(T data)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
         }

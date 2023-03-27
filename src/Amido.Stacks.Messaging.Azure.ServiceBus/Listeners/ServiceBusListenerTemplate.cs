@@ -6,7 +6,6 @@ using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

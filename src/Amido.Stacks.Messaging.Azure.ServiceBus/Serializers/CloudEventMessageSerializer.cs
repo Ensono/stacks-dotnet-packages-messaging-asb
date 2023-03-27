@@ -15,7 +15,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
 {
     public class CloudEventMessageSerializer : IMessageBuilder, IMessageReader
     {
-        private const string DEFAULT_CONTENT_TYPE = "application/cloudevents+json;charset=utf-8";
+        private const string DefaultContentType = "application/cloudevents+json;charset=utf-8";
+        private const string DefaultDataContentType = "application/json";
 
         public Message Build<T>(T body)
         {
@@ -45,14 +46,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
 
             var cloudEvent = new StacksCloudEvent<T>(body, correlationId)
             {
-                DataContentType = "application/json",
+                DataContentType = DefaultDataContentType,
                 Source = GetSource()
             };
 
             var message = new Message
             {
                 CorrelationId = $"{correlationId}",
-                ContentType = DEFAULT_CONTENT_TYPE,
+                ContentType = DefaultContentType,
                 Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(cloudEvent))
             };
 
@@ -71,7 +72,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
                 message.CorrelationId = envelope.CorrelationId;
             }
 
-            message.ContentType = !string.IsNullOrEmpty(envelope.ContentType) ? envelope.ContentType : DEFAULT_CONTENT_TYPE;
+            message.ContentType = !string.IsNullOrEmpty(envelope.ContentType) ? envelope.ContentType : DefaultContentType;
 
             if (!string.IsNullOrEmpty(envelope.Label))
             {
@@ -136,7 +137,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Serializers
             var type = typeof(StacksCloudEvent<>).MakeGenericType(dataType);
             var cloudEvent = Activator.CreateInstance(type, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { data, correlationId }, null);
 
-            type.GetMethod("set_DataContentType", BindingFlags.Instance | BindingFlags.Public).Invoke(cloudEvent, new object[] { "application/json" });
+            type.GetMethod("set_DataContentType", BindingFlags.Instance | BindingFlags.Public).Invoke(cloudEvent, new object[] { DefaultDataContentType });
             type.GetMethod("set_Source", BindingFlags.Instance | BindingFlags.Public).Invoke(cloudEvent, new object[] { GetSource() });
             return cloudEvent;
         }

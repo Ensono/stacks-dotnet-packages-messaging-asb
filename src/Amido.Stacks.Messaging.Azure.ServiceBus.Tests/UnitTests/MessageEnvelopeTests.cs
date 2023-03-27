@@ -27,8 +27,8 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests
             var replyToSessionId = $"replyToSessionId{Guid.NewGuid()}";
             var timeToLive = new TimeSpan(0, 2, 30, 0);
             var viaPartitionKey = $"viaPartitionKey{Guid.NewGuid()}";
-            var userProperty1 = new { Key = "userProperty1Key", Value = "userProperty1" };
-            var userProperty2 = new { Key = "userProperty2Key", Value = "userProperty2" };
+            var userProperty1 = new { Key = $"key{Guid.NewGuid()}", Value = $"value{Guid.NewGuid()}" };
+            var userProperty2 = new { Key = $"key{Guid.NewGuid()}", Value = $"value{Guid.NewGuid()}" };
             var userProperties = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>()
             {
                 { userProperty1.Key, userProperty1.Value },

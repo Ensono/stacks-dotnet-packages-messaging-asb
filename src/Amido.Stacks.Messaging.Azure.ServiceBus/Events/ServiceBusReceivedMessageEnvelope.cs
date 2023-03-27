@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
 {
-    public class ServiceBusReceivedMessageMetaData<T> where T : class
+    public class ServiceBusReceivedMessageEnvelope<T> where T : class
     {
         /// <summary>
         /// The underlying event data
@@ -131,91 +131,91 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
         /// </summary>
         public string DeadLetterSource { get; private set; }
 
-        public ServiceBusReceivedMessageMetaData<T> WithDeadLetterSource(string deadLetterSource)
+        public ServiceBusReceivedMessageEnvelope<T> WithDeadLetterSource(string deadLetterSource)
         {
             DeadLetterSource = deadLetterSource;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithScheduledEnqueueTime(DateTimeOffset scheduledEnqueueTime)
+        public ServiceBusReceivedMessageEnvelope<T> WithScheduledEnqueueTime(DateTimeOffset scheduledEnqueueTime)
         {
             ScheduledEnqueueTime = scheduledEnqueueTime;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithDeadLetterErrorDescription(string deadLetterErrorDescription)
+        public ServiceBusReceivedMessageEnvelope<T> WithDeadLetterErrorDescription(string deadLetterErrorDescription)
         {
             DeadLetterErrorDescription = deadLetterErrorDescription;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithDeadLetterReason(string deadLetterReason)
+        public ServiceBusReceivedMessageEnvelope<T> WithDeadLetterReason(string deadLetterReason)
         {
             DeadLetterReason = deadLetterReason;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithDeliveryCount(int deliveryCount)
+        public ServiceBusReceivedMessageEnvelope<T> WithDeliveryCount(int deliveryCount)
         {
             DeliveryCount = deliveryCount;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithEnqueuedSequenceNumber(long enqueuedSequenceNumber)
+        public ServiceBusReceivedMessageEnvelope<T> WithEnqueuedSequenceNumber(long enqueuedSequenceNumber)
         {
             EnqueuedSequenceNumber = enqueuedSequenceNumber;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithEnqueuedTime(DateTimeOffset enqueuedTime)
+        public ServiceBusReceivedMessageEnvelope<T> WithEnqueuedTime(DateTimeOffset enqueuedTime)
         {
             EnqueuedTime = enqueuedTime;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithLockedUntil(DateTimeOffset lockedUntil)
+        public ServiceBusReceivedMessageEnvelope<T> WithLockedUntil(DateTimeOffset lockedUntil)
         {
             LockedUntil = lockedUntil;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithLockToken(string lockToken)
+        public ServiceBusReceivedMessageEnvelope<T> WithLockToken(string lockToken)
         {
             LockToken = lockToken;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithSequenceNumber(long sequenceNumber)
+        public ServiceBusReceivedMessageEnvelope<T> WithSequenceNumber(long sequenceNumber)
         {
             SequenceNumber = sequenceNumber;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithState(ServiceBusMessageState state)
+        public ServiceBusReceivedMessageEnvelope<T> WithState(ServiceBusMessageState state)
         {
             State = state;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithSubject(string subject)
+        public ServiceBusReceivedMessageEnvelope<T> WithSubject(string subject)
         {
             Subject = subject;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithApplicationProperties(IReadOnlyDictionary<string, object> applicationProperties)
+        public ServiceBusReceivedMessageEnvelope<T> WithApplicationProperties(IReadOnlyDictionary<string, object> applicationProperties)
         {
             ApplicationProperties = applicationProperties;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithTransactionPartitionKey(string transactionPartitionKey)
+        public ServiceBusReceivedMessageEnvelope<T> WithTransactionPartitionKey(string transactionPartitionKey)
         {
             TransactionPartitionKey = transactionPartitionKey;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithExpiresAt(ServiceBusReceivedMessage message)
+        public ServiceBusReceivedMessageEnvelope<T> WithExpiresAt(ServiceBusReceivedMessage message)
         {
             try
             {
@@ -229,61 +229,61 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Events
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithTimeToLive(TimeSpan timeToLive)
+        public ServiceBusReceivedMessageEnvelope<T> WithTimeToLive(TimeSpan timeToLive)
         {
             TimeToLive = timeToLive;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithTo(string to)
+        public ServiceBusReceivedMessageEnvelope<T> WithTo(string to)
         {
             To = to;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithContentType(string contentType)
+        public ServiceBusReceivedMessageEnvelope<T> WithContentType(string contentType)
         {
             ContentType = contentType;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithCorrelationId(string correlationId)
+        public ServiceBusReceivedMessageEnvelope<T> WithCorrelationId(string correlationId)
         {
             CorrelationId = correlationId;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithMessageId(string messageId)
+        public ServiceBusReceivedMessageEnvelope<T> WithMessageId(string messageId)
         {
             MessageId = messageId;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithPartitionKey(string partitionKey)
+        public ServiceBusReceivedMessageEnvelope<T> WithPartitionKey(string partitionKey)
         {
             PartitionKey = partitionKey;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithReplyTo(string replyTo)
+        public ServiceBusReceivedMessageEnvelope<T> WithReplyTo(string replyTo)
         {
             ReplyTo = replyTo;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithSessionId(string sessionId)
+        public ServiceBusReceivedMessageEnvelope<T> WithSessionId(string sessionId)
         {
             SessionId = sessionId;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> WithReplyToSessionId(string replyToSessionId)
+        public ServiceBusReceivedMessageEnvelope<T> WithReplyToSessionId(string replyToSessionId)
         {
             ReplyToSessionId = replyToSessionId;
             return this;
         }
 
-        public ServiceBusReceivedMessageMetaData(T data)
+        public ServiceBusReceivedMessageEnvelope(T data)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
         }

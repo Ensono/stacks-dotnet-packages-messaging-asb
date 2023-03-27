@@ -6,16 +6,16 @@ using Azure.Messaging.ServiceBus;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 {
-    public class MessageMetadataBuilder : IMessageMetadataBuilder
+    public class MessageEnvelopeBuilder : IMessageEnvelopeBuilder
     {
         private readonly IMessagerReaderFactory _messageReaderFactory;
 
-        public MessageMetadataBuilder(IMessagerReaderFactory messageReaderFactory)
+        public MessageEnvelopeBuilder(IMessagerReaderFactory messageReaderFactory)
         {
             _messageReaderFactory = messageReaderFactory ?? throw new ArgumentNullException(nameof(messageReaderFactory));
         }
 
-        public MessageMetadata<T> Build<T>(Message message) where T : class
+        public ReceivedMessageEnvelope<T> BuildFrom<T>(Message message) where T : class
         {
             var serializerName = message.GetSerializerType();
             if (string.IsNullOrEmpty(serializerName))
@@ -30,7 +30,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
             }
 
             var parsedContent = messageReader.ReadMessageBody<T>(message);
-            return new MessageMetadata<T>(parsedContent)
+            return new ReceivedMessageEnvelope<T>(parsedContent)
                 .WithContentType(message.ContentType)
                 .WithCorrelationId(message.CorrelationId)
                 .WithExpiresAtUtc(message)
@@ -50,7 +50,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                 ;
         }
 
-        public ServiceBusReceivedMessageMetaData<T> Build<T>(ServiceBusReceivedMessage message) where T : class
+        public ServiceBusReceivedMessageEnvelope<T> BuildFrom<T>(ServiceBusReceivedMessage message) where T : class
         {
             var serializerName = message.GetSerializerType();
             if (string.IsNullOrEmpty(serializerName))
@@ -65,7 +65,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
             }
 
             var parsedContent = messageReader.ReadMessageBody<T>(message);
-            return new ServiceBusReceivedMessageMetaData<T>(parsedContent)
+            return new ServiceBusReceivedMessageEnvelope<T>(parsedContent)
                 .WithApplicationProperties(message.ApplicationProperties)
                 .WithContentType(message.ContentType)
                 .WithCorrelationId(message.CorrelationId)

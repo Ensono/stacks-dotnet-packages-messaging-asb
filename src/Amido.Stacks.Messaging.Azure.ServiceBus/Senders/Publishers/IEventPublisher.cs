@@ -19,7 +19,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers
         ///      { "Prop2", "123" }
         ///   };
         ///
-        /// var messageEnvelope = new MessageEnvelope(new NotifyEvent(i, Guid.NewGuid().ToString(), i))
+        /// var messageEnvelope = new NotifyEvent(i, Guid.NewGuid().ToString(), i).CreateMessageEnvelope()
         ///  .WithCorrelationId(Guid.NewGuid().ToString())
         ///  .WithLabel("label")
         ///  .WithTo("to")
