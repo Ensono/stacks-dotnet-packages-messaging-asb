@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Handlers;
@@ -63,7 +64,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.IntegrationTests.Steps
         public void TheMessageIsHandledInTheHandler()
         {
             _testable.Received(1)
-                .Complete(Arg.Is<NotifyCommand>(command => command.TestMember == "MessageInTheBottle" && command.CorrelationId == _correlationId));
+                .Complete(Arg.Is<NotifyCommand>(command => command.TestMember == "MessageInTheBottle" && command.CorrelationId == _correlationId.ToString()));
         }
 
         public void TheHostIsRunning()

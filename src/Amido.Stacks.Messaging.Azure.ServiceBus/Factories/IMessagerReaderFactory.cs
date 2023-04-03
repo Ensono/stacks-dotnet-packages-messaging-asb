@@ -4,6 +4,6 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 {
     public interface IMessagerReaderFactory
     {
-        IMessageReader CreateReader<T>(string name = null);
+        IMessageReader CreateReader(string name = null);
     }
 }

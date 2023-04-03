@@ -1,0 +1,74 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
+using Amido.Stacks.Messaging.Events;
+using Shouldly;
+using Xunit;
+
+namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests
+{
+    public class MessageEnvelopeTests
+    {
+        [Fact]
+        public void Properties_Are_Mapped_Correctly()
+        {
+            var sessionId = $"sessionId{Guid.NewGuid()}";
+            var correlationId = Guid.NewGuid();
+            var subject = $"subject{Guid.NewGuid()}";
+            var notifyEvent = new NotifyApplicationEvent(correlationId, 1, sessionId, subject);
+            var label = $"label{Guid.NewGuid()}";
+            var to = $"to{Guid.NewGuid()}";
+            var contentType = $"contentType{Guid.NewGuid()}";
+            var messageId = $"messageId{Guid.NewGuid()}";
+            var scheduledEnqueueTimeUtc = DateTime.UtcNow;
+            var partitionKey = $"partitionKey{Guid.NewGuid()}";
+            var replyTo = $"replyTo{Guid.NewGuid()}";
+            var replyToSessionId = $"replyToSessionId{Guid.NewGuid()}";
+            var timeToLive = new TimeSpan(0, 2, 30, 0);
+            var viaPartitionKey = $"viaPartitionKey{Guid.NewGuid()}";
+            var userProperty1 = new { Key = $"key{Guid.NewGuid()}", Value = $"value{Guid.NewGuid()}" };
+            var userProperty2 = new { Key = $"key{Guid.NewGuid()}", Value = $"value{Guid.NewGuid()}" };
+            var userProperties = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>()
+            {
+                { userProperty1.Key, userProperty1.Value },
+                { userProperty2.Key, userProperty2.Value }
+            });
+
+            // Arrange
+            var sut = MessageEnvelope.CreateMessageEnvelope(notifyEvent)
+                .WithCorrelationId(correlationId.ToString())
+                .WithLabel(label)
+                .WithTo(to)
+                .WithContentType(contentType)
+                .WithMessageId(messageId)
+                .WithScheduledEnqueueTimeUtc(scheduledEnqueueTimeUtc)
+                .WithPartitionKey(partitionKey)
+                .WithReplyTo(replyTo)
+                .WithSessionId(sessionId)
+                .WithReplyToSessionId(replyToSessionId)
+                .WithTimeToLive(timeToLive)
+                .WithMessageId(messageId)
+                .WithViaPartitionKey(viaPartitionKey)
+                .WithUserProperties(userProperties)
+                .Build();
+
+            // Act
+
+            // Assert
+            sut.ContentType.ShouldBe(contentType);
+            sut.MessageId.ShouldBe(messageId);
+            sut.CorrelationId.ShouldBe(correlationId.ToString());
+            sut.Label.ShouldBe(label);
+            sut.To.ShouldBe(to);
+            sut.PartitionKey.ShouldBe(partitionKey);
+            sut.ReplyToSessionId.ShouldBe(replyToSessionId);
+            sut.ReplyTo.ShouldBe(replyTo);
+            sut.SessionId.ShouldBe(sessionId);
+            sut.ViaPartitionKey.ShouldBe(viaPartitionKey);
+            sut.TimeToLive.ShouldBe(timeToLive);
+            sut.ScheduledEnqueueTimeUtc.ShouldBe(scheduledEnqueueTimeUtc);
+            sut.UserProperties.ShouldBeEquivalentTo(userProperties);
+        }
+    }
+}

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
-namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
+namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
 {
     public class JsonMessageReaderTests
     {
@@ -25,7 +25,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             message.SetEnclosedMessageType(typeof(JsonMessageReaderTests));
 
-            ShouldThrowExtensions.ShouldThrow<MessageParsingException>(() => parser.Read<NotifyCommand>(message) as NotifyCommand);
+            ShouldThrowExtensions.ShouldThrow<MessageParsingException>(() => parser.Read(message));
         }
 
         [Fact]
@@ -41,11 +41,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
 
             message.SetEnclosedMessageType(typeof(NotifyCommand));
 
-            var result = parser.Read<NotifyCommand>(message) as NotifyCommand;
+            var result = parser.Read(message) as NotifyCommand;
 
             result.ShouldNotBeNull();
             result.ShouldBeOfType(typeof(NotifyCommand));
-            result.CorrelationId.ShouldBe(correlationId);
+            result.CorrelationId.ShouldBe(correlationId.ToString());
             result.TestMember.ShouldBe(testMember);
         }
 
@@ -56,15 +56,15 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Deserializers
             var correlationId = Guid.NewGuid();
             var message = new Message
             {
-                Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new NotifyEvent(correlationId, 321, "session-id")))
+                Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new NotifyApplicationEvent(correlationId, 321, "session-id")))
             };
 
-            message.SetEnclosedMessageType(typeof(NotifyEvent));
+            message.SetEnclosedMessageType(typeof(NotifyApplicationEvent));
 
-            var result = parser.Read<NotifyEvent>(message) as NotifyEvent;
+            var result = parser.Read(message) as NotifyApplicationEvent;
 
             result.ShouldNotBeNull();
-            result.ShouldBeOfType(typeof(NotifyEvent));
+            result.ShouldBeOfType(typeof(NotifyApplicationEvent));
             result.CorrelationId.ShouldBe(correlationId);
             result.SessionId.ShouldBe("session-id");
         }

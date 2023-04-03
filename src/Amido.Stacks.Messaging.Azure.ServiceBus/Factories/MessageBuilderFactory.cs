@@ -8,14 +8,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
 {
     public class MessageBuilderFactory : IMessageBuilderFactory
     {
-        private readonly IEnumerable<IMessageBuilder> builders;
+        private readonly IEnumerable<Serializers.IMessageBuilder> builders;
 
-        public MessageBuilderFactory(IEnumerable<IMessageBuilder> builders)
+        public MessageBuilderFactory(IEnumerable<Serializers.IMessageBuilder> builders)
         {
             this.builders = builders;
         }
 
-        public IMessageBuilder CreateMessageBuilder(string name)
+        public Serializers.IMessageBuilder CreateMessageBuilder(string name)
         {
             if (name == null)
                 throw new Exception("A serializer name must be provided");

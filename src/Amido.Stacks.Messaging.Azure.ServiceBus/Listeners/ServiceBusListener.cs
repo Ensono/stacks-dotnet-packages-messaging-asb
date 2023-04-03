@@ -74,6 +74,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Listeners
             }
 
             await queueClient.CloseAsync();
+                
             log.LogInformation($"Listener Stopped for entity '{configuration.Name}'.");
         }
 

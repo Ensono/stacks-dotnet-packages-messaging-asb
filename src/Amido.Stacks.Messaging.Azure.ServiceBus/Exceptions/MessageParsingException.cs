@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
@@ -14,6 +15,15 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions
         }
 
         public MessageParsingException(int exceptionCode, string exceptionMessage, Message context,
+            Exception innerException = null) :
+            this(exceptionCode, new Guid(context?.CorrelationId ?? Guid.Empty.ToString()), exceptionMessage,
+                innerException)
+        {
+            (ContentType, MessageId, SessionId)
+                = (context?.ContentType, context?.MessageId, context?.SessionId);
+        }
+
+        public MessageParsingException(int exceptionCode, string exceptionMessage, ServiceBusReceivedMessage context,
             Exception innerException = null) :
             this(exceptionCode, new Guid(context?.CorrelationId ?? Guid.Empty.ToString()), exceptionMessage,
                 innerException)

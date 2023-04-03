@@ -13,9 +13,9 @@ namespace Amido.Stacks.Messaging.Handlers
     /// </summary>
     public class CustomMessageProcessor : IMessageProcessor
     {
-        private readonly ITestable<NotifyEvent> testable;
+        private readonly ITestable<NotifyApplicationEvent> testable;
 
-        public CustomMessageProcessor(ITestable<NotifyEvent> testable)
+        public CustomMessageProcessor(ITestable<NotifyApplicationEvent> testable)
         {
             this.testable = testable;
         }
@@ -24,7 +24,7 @@ namespace Amido.Stacks.Messaging.Handlers
         {
             //Do what you gotta do, you are on your own now
 
-            NotifyEvent eventMsg = new NotifyEvent(Guid.Parse(message.CorrelationId), 098);
+            NotifyApplicationEvent eventMsg = new NotifyApplicationEvent(Guid.Parse(message.CorrelationId), 098);
 
             this.testable.Complete(eventMsg);
 

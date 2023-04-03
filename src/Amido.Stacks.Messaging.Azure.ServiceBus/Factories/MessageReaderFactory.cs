@@ -15,7 +15,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
             this.readers = readers;
         }
 
-        public IMessageReader CreateReader<T>(string name = null)
+        public IMessageReader CreateReader(string name = null)
         {
             if (name == null)
                 throw new Exception("The deserializer name must be provided");
@@ -26,7 +26,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
                     x.GetType().Name == name ||
                     x.GetType().FullName == name);
 
-            return reader as IMessageReader;
+            return reader;
         }
     }
 }

@@ -3,8 +3,9 @@ using System.Linq;
 using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Core.Operations;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Commands;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Hosts;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders;
@@ -13,24 +14,33 @@ using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Publishers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Validators;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Amido.Stacks.Messaging.Azure.ServiceBus.Extensions
 {
     public static class DependencyInjectionExtensions
     {
-        public static IServiceCollection AddServiceBus(this IServiceCollection services)
+        public static IServiceCollection AddServiceBus(this IServiceCollection services, Action<ServiceBusConfiguration> configure)
         {
             services.AddSerializers();
             services.AddValidators();
 
-            var configuration = GetConfiguration(services);
+            var configuration = new ServiceBusConfiguration();
+            if (configure != null)
+            {
+                configure(configuration);
+            }
+            else
+            {
+                configuration = GetConfiguration(services);
+            }
 
-            var sendersRegistered = services.AddServiceBusSenders(configuration.Sender);
-            var listenersRegistered = services.AddServiceBusListeners(configuration.Listener);
+            var sendersRegistered = services.AddServiceBusSenders(configuration);
+            var listenersRegistered = services.AddServiceBusListeners(configuration);
 
             if (!sendersRegistered && !listenersRegistered)
             {
@@ -40,15 +50,32 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        public static IServiceCollection AddServiceBus(this IServiceCollection services)
+        {
+            services.AddServiceBus(null);
+
+            return services;
+        }
+
+        private static bool AddServiceBusSenders(this IServiceCollection services, ServiceBusConfiguration configuration)
+        {
+            return services.AddServiceBusSenders(configuration.Sender);
+        }
+
+        private static bool AddServiceBusListeners(this IServiceCollection services, ServiceBusConfiguration configuration)
+        {
+            return services.AddServiceBusListeners(configuration.Listener);
+        }
+
         private static ServiceBusConfiguration GetConfiguration(IServiceCollection services)
         {
             var config = services.BuildServiceProvider()
                 .GetService<IOptions<ServiceBusConfiguration>>()
                 .Value;
 
-            if (config == null || (config.Sender == null && config.Listener == null))
+            if (config == null || config.Sender == null && config.Listener == null)
             {
-                throw new System.Exception($"Configuration for '{nameof(IOptions<ServiceBusConfiguration>)}' not found. Ensure the call to 'service.Configure<{nameof(ServiceBusConfiguration)}>(configuration)' was called and the appsettings contains at least a definition for Sender or Listener. ");
+                throw new Exception($"Configuration for '{nameof(IOptions<ServiceBusConfiguration>)}' not found. Ensure the call to 'service.Configure<{nameof(ServiceBusConfiguration)}>(configuration)' was called and the appsettings contains at least a definition for Sender or Listener. ");
             }
 
             return config;
@@ -78,14 +105,20 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IValidator<IOperationContext>, DataAnnotationValidator>();
         }
 
+        public static IServiceCollection AddMessageEnvelopeBuilder(this IServiceCollection services)
+        {
+            services.AddTransient<IMessageEnvelopeBuilder, MessageEnvelopeBuilder>();
+            return services;
+        }
+
         // SENDERS
         private static bool AddServiceBusSenders(this IServiceCollection services, ServiceBusSenderConfiguration configuration)
         {
             if (configuration == null ||
-                (
+
                     (configuration.Queues == null || configuration.Queues.Length == 0) &&
                     (configuration.Topics == null || configuration.Topics.Length == 0)
-                )
+
                )
             {
                 return false;
@@ -117,8 +150,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 return false;
 
             services
+                .AddTransient<IServiceBusCommandDispatcher, CommandDispatcher>()
                 .AddTransient<ICommandDispatcher, CommandDispatcher>()
-            ;
+                ;
 
             var factory = services.BuildServiceProvider().GetRequiredService<IServiceBusSenderFactory>();
 
@@ -138,8 +172,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 return false;
 
             services
+                .AddTransient<IEventPublisher, EventPublisher>()
                 .AddTransient<IApplicationEventPublisher, EventPublisher>()
-            ;
+                ;
 
             var factory = services.BuildServiceProvider().GetRequiredService<IServiceBusSenderFactory>();
 
@@ -167,8 +202,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var factory = services.BuildServiceProvider().GetRequiredService<IMessageRouterFactory>();
 
-            if ((configuration.Routing == null) ||
-                (configuration.Routing.Queues == null || configuration.Routing.Queues.Length == 0)
+            if (configuration.Routing == null ||
+                configuration.Routing.Queues == null || configuration.Routing.Queues.Length == 0
               )
             {
                 // This logic will need refactoring if we allow external clients to  inject their own clients
@@ -186,12 +221,12 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 foreach (var route in configuration.Routing?.Queues ?? Enumerable.Empty<MessageRoutingQueueRouterConfiguration>())
                 {
-                    services.AddSingleton<IQueueRouter>((IQueueRouter)factory.Create(route));
+                    services.AddSingleton((IQueueRouter)factory.Create(route));
                 }
             }
 
-            if ((configuration.Routing == null) ||
-                (configuration.Routing.Topics == null || configuration.Routing.Topics.Length == 0)
+            if (configuration.Routing == null ||
+                configuration.Routing.Topics == null || configuration.Routing.Topics.Length == 0
               )
             {
                 if (configuration.Topics?.Length == 1)
@@ -207,7 +242,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 foreach (var route in configuration.Routing?.Topics ?? Enumerable.Empty<MessageRoutingTopicRouterConfiguration>())
                 {
-                    services.AddSingleton<ITopicRouter>((ITopicRouter)factory.Create(route));
+                    services.AddSingleton((ITopicRouter)factory.Create(route));
                 }
             }
         }
@@ -219,10 +254,10 @@ namespace Microsoft.Extensions.DependencyInjection
         {
 
             if (configuration == null ||
-                (
+
                     (configuration.Queues == null || configuration.Queues.Length == 0) &&
                     (configuration.Topics == null || configuration.Topics.Length == 0)
-                )
+
                )
             {
                 return false;
@@ -238,6 +273,8 @@ namespace Microsoft.Extensions.DependencyInjection
                     new MessageHandlerFactory(p,
                         services.GetRegisteredHandlersFor(
                             typeof(ICommandHandler<,>),
+                            typeof(IServiceBusCommandHandler<,>),
+                            typeof(IEventHandler<>),
                             typeof(IApplicationEventHandler<>))
                         ))
 
@@ -260,7 +297,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var queue in queues)
             {
-                services.AddSingleton(factory.Create<ICommand>(queue));
+                services.AddSingleton(factory.Create(queue));
             }
 
             return true;
@@ -275,7 +312,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var topic in topics)
             {
-                services.AddSingleton(factory.Create<IApplicationEvent>(topic));
+                services.AddSingleton(factory.Create(topic));
             }
 
             return true;

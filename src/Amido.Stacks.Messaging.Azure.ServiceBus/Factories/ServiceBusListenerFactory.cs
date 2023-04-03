@@ -16,7 +16,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Factories
             this.serviceProvider = serviceProvider;
         }
 
-        public IMessageListener Create<T>(ServiceBusQueueListenerConfiguration configuration)
+        public IMessageListener Create(ServiceBusQueueListenerConfiguration configuration)
         {
             return new ServiceBusListener(
                             serviceProvider.GetRequiredService<ILogger<ServiceBusListener>>(),

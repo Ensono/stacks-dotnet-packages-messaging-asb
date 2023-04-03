@@ -6,6 +6,7 @@ using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Application.CQRS.Commands;
 using Amido.Stacks.Configuration.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Events;
@@ -138,7 +139,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Routers
 
             //ACT
             var publisher = services.BuildServiceProvider().GetRequiredService<IApplicationEventPublisher>();
-            await publisher.PublishAsync(new NotifyEvent(guid, 1));
+            await publisher.PublishAsync(new NotifyApplicationEvent(guid, 1));
 
             //ASSERT
             await senderClients.Single(s => s.Path == route.SendTo.First())

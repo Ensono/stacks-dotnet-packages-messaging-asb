@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
 {
@@ -23,6 +24,31 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Senders.Routers
             var router = GetRouter(msg.GetType());
 
             await router.SendAsync(msg);
+        }
+
+        public async Task RouteAsync(IMessageEnvelope msg)
+        {
+            var router = GetRouter(msg.Data.GetType());
+
+            await router.SendAsync(msg);
+        }
+
+        public async Task RouteAsync(IEnumerable<object> msgs)
+        {
+            var msg = msgs.FirstOrDefault();
+
+            var router = GetRouter(msg.GetType());
+
+            await router.SendAsync(msgs);
+        }
+
+        public async Task RouteAsync(IEnumerable<IMessageEnvelope> msgs)
+        {
+            var msg = msgs.FirstOrDefault();
+
+            var router = GetRouter(msg.Data.GetType());
+
+            await router.SendAsync(msgs);
         }
 
         private T GetRouter(Type type)

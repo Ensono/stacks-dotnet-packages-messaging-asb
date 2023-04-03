@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Events;
@@ -28,11 +29,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
         List<IReceiverClient> receiverClients = new List<IReceiverClient>();
 
 
-        ITestable<NotifyEvent> testable;
+        ITestable<NotifyApplicationEvent> testable;
 
         public TopicListenerTestsTests()
         {
-            testable = Substitute.For<ITestable<NotifyEvent>>();
+            testable = Substitute.For<ITestable<NotifyApplicationEvent>>();
 
             config = new ServiceBusConfiguration()
             {
@@ -74,7 +75,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
 
 
         [Theory]
-        [InlineData(nameof(JsonMessageSerializer), nameof(NotifyEvent))]
+        [InlineData(nameof(JsonMessageSerializer), nameof(NotifyApplicationEvent))]
         [InlineData(nameof(JsonMessageSerializer), "")]
         [InlineData(nameof(CloudEventMessageSerializer), "")]
         public async Task Given_A_Message_Is_Received_From_UnknownType_Is_DeadLettered(string serializer, string enclosedTypeName)
@@ -83,7 +84,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>()
+                .AddTransient<IApplicationEventHandler<NotifyApplicationEvent>, NotifyApplicationEventHandler>()
                 .AddServiceBus()
             ;
 
@@ -98,7 +99,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(0).Complete(Arg.Any<NotifyEvent>());
+            testable.Received(0).Complete(Arg.Any<NotifyApplicationEvent>());
             await client.Received(1).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
 
@@ -111,7 +112,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             var guid = Guid.NewGuid();
 
             services
-                .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>()
+                .AddTransient<IApplicationEventHandler<NotifyApplicationEvent>, NotifyApplicationEventHandler>()
                 .AddServiceBus()
             ;
 
@@ -125,7 +126,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyEvent>(m => m.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyApplicationEvent>(m => m.CorrelationId == guid));
         }
 
 
@@ -149,14 +150,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(0).Complete(Arg.Any<NotifyEvent>());
+            testable.Received(0).Complete(Arg.Any<NotifyApplicationEvent>());
             await client.Received(1).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
 
 
         private static Message BuildMessage(string serializer, Guid guid)
         {
-            var obj = new NotifyEvent(guid, 123);
+            var obj = new NotifyApplicationEvent(guid, 123);
 
             if (serializer == nameof(CloudEventMessageSerializer))
                 return new CloudEventMessageSerializer().Build<IApplicationEvent>(obj);

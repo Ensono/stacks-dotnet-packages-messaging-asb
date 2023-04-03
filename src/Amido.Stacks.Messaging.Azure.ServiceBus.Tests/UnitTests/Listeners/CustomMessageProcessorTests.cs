@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Configuration;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Extensions;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Factories;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Listeners;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
@@ -29,11 +30,11 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
         List<IReceiverClient> receiverClients = new List<IReceiverClient>();
 
 
-        ITestable<NotifyEvent> testable;
+        ITestable<NotifyApplicationEvent> testable;
 
         public CustomMessageProcessorTests()
         {
-            testable = Substitute.For<ITestable<NotifyEvent>>();
+            testable = Substitute.For<ITestable<NotifyApplicationEvent>>();
 
             config = new ServiceBusConfiguration()
             {
@@ -93,7 +94,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyApplicationEvent>(e => e.CorrelationId == guid));
             await client.Received(1).CompleteAsync(Arg.Is<string>(a => a == lockToken.ToString()));
             await client.Received(0).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
@@ -116,14 +117,14 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
             msg.SetLockOnMessage();
 
             //Simulate Failure
-            testable.When(c => c.Complete(Arg.Any<NotifyEvent>())).Do(X => { throw new Exception(); });
+            testable.When(c => c.Complete(Arg.Any<NotifyApplicationEvent>())).Do(X => { throw new Exception(); });
 
             //ACT
             var client = (FakeSBClient)receiverClients.First();
             await client.SendAsyncToReceiver(msg);
 
             ////ASSERT
-            testable.Received(1).Complete(Arg.Is<NotifyEvent>(e => e.CorrelationId == guid));
+            testable.Received(1).Complete(Arg.Is<NotifyApplicationEvent>(e => e.CorrelationId == guid));
             await client.Received(0).CompleteAsync(Arg.Any<string>());
             await client.Received(0).DeadLetterAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
@@ -140,7 +141,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Listeners
 
         private static Message BuildMessage(string serializer, Guid guid)
         {
-            var obj = new NotifyEvent(guid, 123);
+            var obj = new NotifyApplicationEvent(guid, 123);
 
             if (serializer == nameof(CloudEventMessageSerializer))
                 return new CloudEventMessageSerializer().Build<IApplicationEvent>(obj);

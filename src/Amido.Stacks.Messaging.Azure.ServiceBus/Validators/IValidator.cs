@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using Amido.Stacks.Core.Operations;
+﻿using Amido.Stacks.Core.Operations;
 
 namespace Amido.Stacks.Messaging.Azure.ServiceBus.Validators
 {
