@@ -16,7 +16,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests
             var sessionId = $"sessionId{Guid.NewGuid()}";
             var correlationId = Guid.NewGuid();
             var subject = $"subject{Guid.NewGuid()}";
-            var notifyEvent = new NotifyEvent(correlationId, 1, sessionId, subject);
+            var notifyEvent = new NotifyApplicationEvent(correlationId, 1, sessionId, subject);
             var label = $"label{Guid.NewGuid()}";
             var to = $"to{Guid.NewGuid()}";
             var contentType = $"contentType{Guid.NewGuid()}";

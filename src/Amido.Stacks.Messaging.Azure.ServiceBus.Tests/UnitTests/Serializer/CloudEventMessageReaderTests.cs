@@ -1,7 +1,5 @@
 ﻿using System;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
 using Amido.Stacks.Application.CQRS.Commands;
-using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Azure.ServiceBus.Serializers;
 using Amido.Stacks.Messaging.Commands;
 using Amido.Stacks.Messaging.Events;
@@ -36,12 +34,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
             var serializer = new CloudEventMessageSerializer();
 
             var correlationId = Guid.NewGuid();
-            var message = serializer.Build(new NotifyEvent(correlationId, 321, "session-id"));
+            var message = serializer.Build(new NotifyApplicationEvent(correlationId, 321, "session-id"));
 
-            var result = serializer.Read(message) as NotifyEvent;
+            var result = serializer.Read(message) as NotifyApplicationEvent;
 
             result.ShouldNotBeNull();
-            result.ShouldBeOfType(typeof(NotifyEvent));
+            result.ShouldBeOfType(typeof(NotifyApplicationEvent));
             result.EventCode.ShouldBe(123);
             result.CorrelationId.ShouldBe(correlationId);
             result.OperationCode.ShouldBe(321);

@@ -105,6 +105,12 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Extensions
             services.AddTransient<IValidator<IOperationContext>, DataAnnotationValidator>();
         }
 
+        public static IServiceCollection AddMessageEnvelopeBuilder(this IServiceCollection services)
+        {
+            services.AddTransient<IMessageEnvelopeBuilder, MessageEnvelopeBuilder>();
+            return services;
+        }
+
         // SENDERS
         private static bool AddServiceBusSenders(this IServiceCollection services, ServiceBusSenderConfiguration configuration)
         {

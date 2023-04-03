@@ -22,7 +22,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Factories
             var sessionId = $"sessionId{Guid.NewGuid()}";
             var subject = $"subject{Guid.NewGuid()}";
 
-            var notifyEvent = new NotifyEvent(correlationId, operationCode, sessionId, subject);
+            var notifyEvent = new NotifyApplicationEvent(correlationId, operationCode, sessionId, subject);
             var cloudEventMessageSerializer = new CloudEventMessageSerializer();
             var newMessage = cloudEventMessageSerializer.Build(notifyEvent);
             message.Body = newMessage.Body;
@@ -33,13 +33,13 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Factories
             var messageEnvelopeBuilder = new MessageEnvelopeBuilder(messageReaderFactory);
 
             // Act
-            var messageEnvelope = messageEnvelopeBuilder.BuildFrom<StacksCloudEvent<NotifyEvent>>(message);
+            var messageEnvelope = messageEnvelopeBuilder.BuildFrom<StacksCloudEvent<NotifyApplicationEvent>>(message);
 
             // Assert
             messageEnvelope.ContentType.ShouldBe(message.ContentType);
             messageEnvelope.CorrelationId.ShouldBe(message.CorrelationId);
-            messageEnvelope.Data.ShouldBeOfType(typeof(StacksCloudEvent<NotifyEvent>));
-            messageEnvelope.Data.Data.ShouldBeOfType(typeof(NotifyEvent));
+            messageEnvelope.Data.ShouldBeOfType(typeof(StacksCloudEvent<NotifyApplicationEvent>));
+            messageEnvelope.Data.Data.ShouldBeOfType(typeof(NotifyApplicationEvent));
             messageEnvelope.Data.Data.CorrelationId.ShouldBe(notifyEvent.CorrelationId);
             messageEnvelope.Data.Data.SessionId.ShouldBe(notifyEvent.SessionId);
             messageEnvelope.Data.Data.Subject.ShouldBe(notifyEvent.Subject);

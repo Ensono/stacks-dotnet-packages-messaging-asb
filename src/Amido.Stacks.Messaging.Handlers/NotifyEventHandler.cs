@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using Amido.Stacks.Application.CQRS.ApplicationEvents;
+using Amido.Stacks.Messaging.Azure.ServiceBus.Events;
 using Amido.Stacks.Messaging.Events;
 using Amido.Stacks.Messaging.Handlers.TestDependency;
 
 namespace Amido.Stacks.Messaging.Handlers
 {
-    public class NotifyEventHandler : IApplicationEventHandler<NotifyEvent>
+    public class NotifyEventHandler : IEventHandler<NotifyEvent>
     {
         private readonly ITestable<NotifyEvent> _testable;
 
@@ -14,9 +14,9 @@ namespace Amido.Stacks.Messaging.Handlers
             _testable = testable;
         }
 
-        public Task HandleAsync(NotifyEvent applicationEvent)
+        public Task HandleAsync(NotifyEvent evt)
         {
-            _testable.Complete(applicationEvent);
+            _testable.Complete(evt);
             return Task.CompletedTask;
         }
     }

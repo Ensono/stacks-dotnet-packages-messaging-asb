@@ -34,7 +34,7 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Extensions
         public void MessageExtensionSetSessionId()
         {
             var message = new Message();
-            message.SetSessionId(new NotifyEvent(Guid.NewGuid(), 1, "session-id"));
+            message.SetSessionId(new NotifyApplicationEvent(Guid.NewGuid(), 1, "session-id"));
             message.SessionId.ShouldBe("session-id");
         }
         

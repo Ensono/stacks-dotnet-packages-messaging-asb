@@ -56,15 +56,15 @@ namespace Amido.Stacks.Messaging.Azure.ServiceBus.Tests.UnitTests.Serializer
             var correlationId = Guid.NewGuid();
             var message = new Message
             {
-                Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new NotifyEvent(correlationId, 321, "session-id")))
+                Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new NotifyApplicationEvent(correlationId, 321, "session-id")))
             };
 
-            message.SetEnclosedMessageType(typeof(NotifyEvent));
+            message.SetEnclosedMessageType(typeof(NotifyApplicationEvent));
 
-            var result = parser.Read(message) as NotifyEvent;
+            var result = parser.Read(message) as NotifyApplicationEvent;
 
             result.ShouldNotBeNull();
-            result.ShouldBeOfType(typeof(NotifyEvent));
+            result.ShouldBeOfType(typeof(NotifyApplicationEvent));
             result.CorrelationId.ShouldBe(correlationId);
             result.SessionId.ShouldBe("session-id");
         }
