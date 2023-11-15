@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Amido.Stacks.Application.CQRS.Abstractions" Version="0.2.17" />
+      <PackageReference Include="Amido.Stacks.Application.CQRS.Abstractions" Version="0.2.23" />
     </ItemGroup>
 
     <ItemGroup>

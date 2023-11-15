@@ -28,7 +28,7 @@ variables:
     value: "$(self_pipeline_repo)/scripts"
   # Path specific for this package, change accordingly
   - name: Package.Feed
-    value: "Stacks"
+    value: ""
   - name: Package.Public
     value: true
   - name: Package.nuget_service_connection

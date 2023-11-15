@@ -1,73 +1,78 @@
 # Amido Stacks Messaging Azure ServiceBus
 
 This library is wrapper around Azure Service Bus.
-The main goal is:
+The main goals are:
 
-    1.) to send a command to a queue or publish an event to a particular topic,
-    2.) to listen to an Azure Service Bus queue or a topic as a subscription,
-    3.) to parse the message to a predefined strongly typed object when arrives,
-    4.) to pass the parsed object to a predefined handler.
+1. to send a command to a queue or publish an event to a particular topic,
+2. to listen to an Azure Service Bus queue or a topic as a subscription,
+3. to parse the message to a predefined strongly typed object when arrives,
+4. to pass the parsed object to a predefined handler.
 
 ## 1. Registration/Usage
 
 ### 1.1 Dependencies
- - `Amido.Stacks.Configuration`
- - `Amido.Stacks.Application.CQRS.Abstractions`
- - `Amido.Stacks.DependencyInjection`
- - `Microsoft.Azure.ServiceBus`
- - `Microsoft.Extensions.Hosting`
+
+- `Amido.Stacks.Configuration`.
+- `Amido.Stacks.Application.CQRS.Abstractions`.
+- `Amido.Stacks.DependencyInjection`.
+- `Microsoft.Azure.ServiceBus`.
+- `Microsoft.Extensions.Hosting`.
 
 ### 1.2 Currently Supported messages
 
 The library currently supports:
-  - sending and receiving commands implementing `Amido.Stacks.Application.CQRS.Commands.ICommands`,
-  - publishing and receiving events implementing `Amido.Stacks.Application.CQRS.ApplicationEvents.IApplicationEvent`
 
+- Sending and receiving commands implementing `Amido.Stacks.Application.CQRS.Commands.ICommands`.
+- Publishing and receiving events implementing `Amido.Stacks.Application.CQRS.ApplicationEvents.IApplicationEvent`.
 
 ### 1.3 Usage in dotnet core application
+
 #### 1.3.1 Command
+
 As an example we are having a `NotifyCommandHandler` as a handler for `NotifyCommand`. The handler implements
 `Amido.Stacks.Application.CQRS.Commands.ICommandHandler<NotifyCommand, bool>` and the command implements
 `Amido.Stacks.Application.CQRS.Commands.ICommand` interfaces.
 
 ***NotifyCommand.cs***
-```cs
-    public class NotifyCommand : ICommand
-    {
-        public NotifyCommand(Guid correlationId, string testMember)
-        {
-            OperationCode = 666;
-            CorrelationId = correlationId;
-            TestMember = testMember;
-        }
 
-        public string TestMember { get; }
-        public int OperationCode { get; }
-        public Guid CorrelationId { get; }
+```cs
+public class NotifyCommand : ICommand
+{
+    public NotifyCommand(Guid correlationId, string testMember)
+    {
+        OperationCode = 666;
+        CorrelationId = correlationId;
+        TestMember = testMember;
     }
+
+    public string TestMember { get; }
+    public int OperationCode { get; }
+    public Guid CorrelationId { get; }
+}
 ```
 
 ***NotifyCommandHandler.cs***
 
 ```cs
-    public class NotifyCommandHandler : ICommandHandler<NotifyCommand, bool>
+public class NotifyCommandHandler : ICommandHandler<NotifyCommand, bool>
+{
+    private readonly ITestable<NotifyCommand> _testable;
+
+    public NotifyCommandHandler(ITestable<NotifyCommand> testable)
     {
-        private readonly ITestable<NotifyCommand> _testable;
-
-        public NotifyCommandHandler(ITestable<NotifyCommand> testable)
-        {
-            _testable = testable;
-        }
-
-        public Task<bool> HandleAsync(NotifyCommand command)
-        {
-            _testable.Complete(command);
-            return Task.FromResult(true);
-        }
+        _testable = testable;
     }
+
+    public Task<bool> HandleAsync(NotifyCommand command)
+    {
+        _testable.Complete(command);
+        return Task.FromResult(true);
+    }
+}
 ```
 
 ##### 1.3.1.1 CommandDispatcher configuration
+
 The command dispatchers responsibility is to send a command message to a preconfigured queue. The FullName - such as
 `Amido.Stacks.Messaging.Commands.NotifyCommand` - of the type (command) is paired
 with the queue-name in the ***Routing*** configuration. Each individual queue will have one message sender, therefore the
@@ -116,15 +121,18 @@ The configuration for the ***CommandDispatcher*** is in the ***ServiceBusSender*
     }
 }
 ```
-***Usage***
-```Startup.cs
+
+***startup.cs***
+
+```cs
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddTransient<Consumer>();
         services.Configure<ServiceBusSenderConfiguration>(configurationRoot.GetSection("ServiceBusSender"))
-        .AddServiceBusCommandDispatcher();
+        services.AddTransient<ICommandHandler<NotifyCommand, bool>, NotifyCommandHandler>();
+        .AddServiceBus();
     }
 }
 
@@ -143,6 +151,7 @@ public class Consumer
     }
 }
 ```
+
 ##### 1.3.1.2 Command Listener configuration
 
 The listener can listen to many queues. The ***Name*** describes the name of the queue, ***ConcurrencyLevel***
@@ -151,6 +160,7 @@ to Service Bus - and ***DisableMessageValidation*** flag disables/enables the va
 messages. The configuration for the ***Listener*** is under ***ServiceBusListener*** section.
 
 ***appsettings.json***
+
 ```json
 {
   "ServiceBusConfiguration": {
@@ -172,7 +182,7 @@ messages. The configuration for the ***Listener*** is under ***ServiceBusListene
 }
 ```
 
-***Program.cs***
+***Usage***
 
 ```cs
 
@@ -190,13 +200,14 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
                 .AddLogging()
                 .AddSecrets()
                 .Configure<ServiceBusConfiguration>(hostContext.Configuration.GetSection("ServiceBusConfiguration"))
-                .AddServiceBus()
                 .AddTransient<ICommandHandler<NotifyClientCommand, bool>, NotifyClientCommandHandler>();
+                .AddServiceBus()
         });
 }
 ```
 
 #### 1.3.2 Event
+
 In this case the `NotifyEvent` has a `NotifyEventHandler`. The handler implements
 `Amido.Stacks.Application.CQRS.ApplicationEvents.IApplicationEventHandler<NotifyCommand, bool>` and the command implements
 `Amido.Stacks.Application.CQRS.ApplicationEvents.IApplicationEvent` interfaces.
@@ -240,6 +251,7 @@ In this case the `NotifyEvent` has a `NotifyEventHandler`. The handler implement
 ```
 
 ##### 1.3.1.1 EventPublisher configuration
+
 Its responsibility is to publish an event message to a preconfigured topic. The topic for the event depends on the ***Routing*** configuration.
 The following routing table will picture the different configurations:
 
@@ -285,15 +297,17 @@ The following routing table will picture the different configurations:
     }
 }
 ```
-***Usage***
-```Startup.cs
+
+***Startup.cs***
+
+```cs
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddTransient<Consumer>()
             .Configure<ServiceBusSenderConfiguration>(configurationRoot.GetSection("ServiceBusSender"))
-            .AddServiceBusEventPublisher();
+            .AddServiceBus();
     }
 }
 
@@ -312,6 +326,7 @@ public class Consumer
     }
 }
 ```
+
 ##### 1.3.1.2 Event Listener configuration
 
 The listener can listen to many topics. The ***Name*** describes the name of the topic, ***ConcurrencyLevel***
@@ -320,6 +335,7 @@ to Service Bus - and ***DisableMessageValidation*** flag disables/enables the va
 messages. The configuration for the event listener is under ***ServiceBusListener*** section.
 
 ***appsettings.json***
+
 ```json
 {
   "ServiceBusConfiguration": {
@@ -341,39 +357,39 @@ messages. The configuration for the event listener is under ***ServiceBusListene
     }
 }
 ```
-***Program.cs***
-```cs
-...
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(builder =>
-                {
-                    // Add the configuration file
-                    builder.SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", optional: true);
-                })
-               .ConfigureServices((hostContext, services) =>
-                {
 
-                    services
-                        .AddLogging()
-                        .AddSecrets()
-                        .Configure<ServiceBusConfiguration>(hostContext.Configuration.GetSection("ServiceBusConfiguration"))
-                        .AddServiceBus()
-                        .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>();
-                });
-        }
-...
+***Program.cs***
+
+```cs
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration(builder =>
+        {
+            // Add the configuration file
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true);
+        })
+        .ConfigureServices((hostContext, services) =>
+        {
+
+            services
+                .AddLogging()
+                .AddSecrets()
+                .Configure<ServiceBusConfiguration>(hostContext.Configuration.GetSection("ServiceBusConfiguration"))
+                .AddServiceBus()
+                .AddTransient<IApplicationEventHandler<NotifyEvent>, NotifyEventHandler>();
+        });
+}
 ```
 
-
 ### Unrecoverable exceptions
+
  The unrecoverable exceptions are the exceptions when the parsing of the object fails due to the invalid
  state of the message. We don't want to retry the process of these messages as it would result
  the same exception, therefore they are moved to the dead-letter queue with the specified reason,
  why it has been placed to the dead-letter queue.
 
  Unrecoverable exceptions are:
-  - `Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions.UnrecoverableException` general exception,
-  - `Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions.MessageParsingException` parsing related exception
 
+- `Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions.UnrecoverableException` general exception.
+- `Amido.Stacks.Messaging.Azure.ServiceBus.Exceptions.MessageParsingException` parsing related exception.

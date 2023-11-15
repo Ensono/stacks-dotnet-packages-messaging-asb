@@ -19,7 +19,7 @@ resources:
   repositories:
     - repository: templates
       type: github
-      name: amido/stacks-pipeline-templates
+      name: Ensono/stacks-pipeline-templates
       ref: refs/tags/v2.0.6
       # Created when you set up the connection to GitHub from Azure DevOps
       endpoint: amidostacks
